@@ -1,0 +1,15 @@
+Green (Dress and Background):
+Hex: #3E5B3E
+RGB: 62, 91, 62
+
+Red (Text, CTA, Header Background):
+Hex: #9B2A2A
+RGB: 155, 42, 42
+
+Gold/Yellow (Accents like Wheat, Icons):
+Hex: #D4A237
+RGB: 212, 162, 55
+
+Cream/Light Beige (For contrast and light backgrounds):
+Hex: #F1E6D1
+RGB: 241, 230, 209
