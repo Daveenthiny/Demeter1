@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demeter | Contact Us</title>
+  <link rel="stylesheet" href="../styles/home_page.css" />
+    <style>
+    .contact-section {
+    display: flex;
+    justify-content: center;
+    padding: 4rem 1rem;
+    }
+
+    .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-top: 2rem;
+    }
+
+    .contact-form label {
+    font-weight: 600;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+    padding: 0.75rem;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    width: 100%;
+    max-width: 500px;
+    font-size: 1rem;
+    }
+
+    .contact-form textarea {
+    resize: vertical;
+    min-height: 120px;
+    }
+
+    .contact-form button {
+    width: fit-content;
+    margin-top: 1rem;
+    }
+
+    .contact-section .content-box.with-bar {
+    max-width: 700px;
+    padding: 2.5rem;
+    }
+    </style>
+    </head>
+    <body>
+        <header style="display: flex; align-items: center; justify-content: space-between;">
+            <a href="../index.html" class="logo-text">Demeter</a>
+
+            <nav style="display: flex; list-style: none; padding: 0; margin: 0;">
+            <li style="margin-right: 15px;"><a href="../index.html">Home</a></li>
+            <li style="margin-right: 15px;"><a href="customer.html">Customers</a></li>
+            <li style="margin-right: 15px;"><a href="vendor.html">Vendors</a></li>
+            <li style="margin-right: 15px;"><a href="composter.html">Composters</a></li>
+            <li style="margin-right: 15px;"><a href="register.html">Register</a></li>
+            <li style="margin-right: 15px;"><a href="signin.html">Sign In</a></li>
+            </nav>
+        </header>
+        <section class="contact-section">
+            <div class="content-box with-bar">
+              <h1>Contact Us</h1>
+              <p>Have a question or want to get in touch? Fill out the form below and we’ll respond as soon as possible.</p>
+          
+              <form action="#" method="post" class="contact-form">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+          
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+          
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="6" required></textarea>
+          
+                <button type="submit" class="cta">Send Message</button>
+              </form>
+            </div>
+          </section>
+          <div class="contact-extra">
+            <h2>Other Ways to Reach Us</h2>
+          
+            <div class="contact-details">
+              <p><strong>Email:</strong> <a href="mailto:support@demetermarketplace.com">support@demetermarketplace.com</a></p>
+              <p><strong>Business Address:</strong><br>
+                Demeter HQ<br>
+                123 Sustainable Way<br>
+                Greenfield, GA 30303
+              </p>
+          
+              <div class="social-links">
+                <p><strong>Follow Us:</strong></p>
+                <a href="#" aria-label="Demeter on Instagram">Instagram</a> |
+                <a href="#" aria-label="Demeter on Twitter">Twitter</a> |
+                <a href="#" aria-label="Demeter on LinkedIn">LinkedIn</a>
+              </div>
+            </div>
+          </div>
+          <footer class="site-footer">
+            <nav class="footer-nav">
+              <ul>
+                <li><a href="aboutus.html">About Us</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                <li><a href="terms-of-service.html">Terms of Service</a></li>
+                <li><a href="our-impact.html">Our Impact</a></li>
+                <li><a href="success-stories.html">Success Stories</a></li>
+                <li><a href="resources.html">Local Food Waste Resources</a></li>
+              </ul>
+            </nav>
+                <p style="margin-left:auto;font-size:0.9rem;">&copy; <span id="current-year"></span>&nbsp;Demeter Marketplace. All rights reserved.</p>
+            </footer>
+            <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1614.0.min.js"></script>
+        <script>
+            // Dynamically update the current year in the footer
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+
+            // Update distance dynamically
+            document.getElementById('composter-filter-distance').addEventListener('input', function () {
+                document.getElementById('composter-distance-value').textContent = `${this.value} miles`;
+            });
+
+            // Handle profile form submission (This logic can remain here or be moved to main.js)
+            document.getElementById('composter-profile-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const status = document.getElementById('profile-save-status');
+                status.textContent = 'Profile updated successfully!';
+                status.style.display = 'block';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            });
+        </script>
+    </body>

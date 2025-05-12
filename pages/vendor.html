@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Vendor Dashboard – Demeter</title>
+<link rel="icon" href="data:;base64,iVBORw0KGgo="> <link rel="stylesheet" href="../styles/home_page.css">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* --- General & Buttons --- */
+button, .cta-button-secondary {
+  background-color: #3182ce; color: #fff; border: none; border-radius: 5px;
+  padding: 10px 15px; cursor: pointer; font-family: inherit; font-size: 1em;
+  transition: opacity 0.2s ease; margin-right: 5px; /* Reduced margin */
+}
+.cta-button-secondary { background-color: #6c757d; }
+button:hover, .cta-button-secondary:hover { opacity: .9; }
+button:disabled { background-color: #a0aec0; cursor: not-allowed; opacity: 0.7; }
+#signOutButton { padding: 5px 10px; font-size: 0.9em; margin-right: 0; }
+
+/* --- Dashboard & Sections --- */
+.dashboard-page h1 { color: #000408; margin-bottom: 20px; font-size: 1.8em; }
+.dashboard-section { margin-bottom: 30px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1); }
+.dashboard-section h2 { margin-top: 0; color: #00050e; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.4em; }
+
+/* --- Listings --- */
+#vendor-listings-container { margin-top: 20px; }
+.listing-item { border: 1px solid #eee; padding: 15px; margin-bottom: 15px; background: #f9f9f9; border-radius: 5px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-start; }
+.listing-item img { max-width: 100px; height: 100px; /* Fixed height */ object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+.listing-details { flex-grow: 1; min-width: 250px; /* Prevent excessive shrinking */ }
+.listing-details h3 { margin: 0 0 5px 0; font-size: 1.1em; }
+.listing-details p { margin: 4px 0; font-size: 0.9em; line-height: 1.4; color: #555; }
+.listing-details p strong { color: #333; }
+.listing-actions { flex-basis: 100%; text-align: right; margin-top: 10px; border-top: 1px dashed #eee; padding-top: 10px; }
+.listing-actions button { padding: 5px 10px; font-size: .85em; margin-left: 10px; }
+
+/* --- Form --- */
+#foodItemForm table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+#foodItemForm td { padding: 8px 4px; vertical-align: top; }
+#foodItemForm label { display: block; margin-bottom: 5px; font-weight: 600; font-size: .9em; color: #444; }
+#foodItemForm input, #foodItemForm select, #foodItemForm textarea {
+    width: 100%; /* Use 100% width */
+    padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px;
+    box-sizing: border-box; /* Include padding/border in width */
+    font-family: 'Montserrat', sans-serif; font-size: 0.95em;
+}
+#foodItemForm input[type="file"] { padding: 5px; } /* Adjust file input padding */
+#foodItemForm textarea { resize: vertical; min-height: 60px; }
+#foodItemForm input:read-only { background: #e9ecef; }
+.form-status { margin-top: 10px; font-weight: 600; font-size: .9em; padding: 8px; border-radius: 4px; }
+.success-message { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+.error-message-inline { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+
+/* --- Orders table --- */
+#vendor-orders .table-wrapper { width: 100%; overflow-x: auto; }
+#vendor-orders table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .9rem; }
+#vendor-orders th, #vendor-orders td { border: 1px solid #dcdcdc; padding: 8px 10px; text-align: left; white-space: nowrap; }
+#vendor-orders thead { background: #f4f6f8; font-weight: 600; }
+#vendor-orders tbody tr:nth-child(even) { background: #fafafa; }
+#vendor-orders tbody tr:hover { background: #f1f9ff; }
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  header, footer { flex-direction: column; text-align: center; }
+  header nav { margin-top: 10px; }
+  header nav ul { justify-content: center; }
+  header nav li { margin: 0 10px; }
+  footer nav { margin-top: 10px; width: 100%; }
+  footer nav ul { flex-wrap: wrap; justify-content: center; padding: 0; }
+  footer nav li { margin: 5px 10px; }
+  footer p { text-align: center; margin-top: 10px; margin-left: 0; width: 100%; }
+  #foodItemForm td { display: block; width: 100%; padding: 5px 0; } /* Stack form cells */
+  #foodItemForm tr { display: block; margin-bottom: 10px; }
+  .listing-item { flex-direction: column; align-items: center; text-align: center; }
+  .listing-item img { margin-bottom: 10px; }
+  .listing-actions { text-align: center; }
+}
+</style>
+</head>
+
+<body>
+    <header style="display:flex;align-items:center;justify-content:space-between;">
+        <a href="../index.html" class="logo" style="margin-right: auto;">
+          <img src="../assets/photos/demeter_logo_png.png" alt="Demeter Logo" class="logo-icon" />
+        </a>
+        <nav>
+          <ul style="display: flex; list-style: none; padding: 0; margin: 0; align-items: center;">
+            <li style="margin-right: 15px;"><a href="../index.html">Home</a></li>
+            <li style="margin-left: 10px;"><button id="signOutButton" class="cta-button-secondary">Sign Out</button></li>
+          </ul>
+        </nav>
+      </header>
+
+<main class="dashboard-page">
+<div class="container">
+
+  <div id="auth-error-message" class="error-message-inline" style="display:none; text-align: center; padding: 10px; margin-bottom: 20px;"></div>
+
+  <div id="dashboard-content" style="display:none">
+    <h1>Vendor Dashboard</h1>
+    <p>Welcome, <strong id="welcome-vendor-name">Vendor</strong>! Manage your food listings and view received orders below.</p>
+
+    <section class="dashboard-section">
+      <h2>Add / Edit Food Item</h2>
+      <form id="foodItemForm" enctype="multipart/form-data">
+        <input type="hidden" id="itemId">
+        <input type="hidden" id="currentVendorId">
+        <input type="hidden" id="currentVendorName">
+
+        <table>
+          <tr>
+            <td><label for="name">Item Name</label></td>
+            <td><input id="name" required></td>
+            <td><label for="category">Category</label></td>
+            <td>
+              <select id="category" required>
+                <option value="">Select Category</option>
+                <option value="Fruits & Vegetables">Fruits & Vegetables</option>
+                <option value="Grains, Bread & Bakery">Grains, Bread & Bakery</option>
+                <option value="Meat, Poultry & Seafood">Meat, Poultry & Seafood</option>
+                <option value="Dairy & Eggs">Dairy & Eggs</option>
+                <option value="Canned & Packaged Goods">Canned & Packaged Goods</option>
+                <option value="Snacks & Sweets">Snacks & Sweets</option>
+                <option value="Prepared & Ready-to-Eat Foods">Prepared & Ready-to-Eat Foods</option>
+                <option value="Condiments, Spices & Oils">Condiments, Spices & Oils</option>
+                <option value="Beverages">Beverages</option>
+                <option value="Plant-Based / Vegetarian / Vegan">Plant-Based / Vegetarian / Vegan</option>
+                <option value="Others">Others</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td><label for="condition">Condition</label></td>
+            <td>
+              <select id="condition" required>
+                <option value="">Select Condition</option>
+                <option value="Imperfect or Ugly Produce">Imperfect or "Ugly" Produce</option>
+                <option value="Overripe">Overripe</option>
+                <option value="Day-Old / Near Expiry">Day-Old / Near Expiry</option>
+                <option value="Short-Dated">Short-Dated</option>
+                <option value="Overstock">Overstock</option>
+                <option value="Leftovers">Leftovers</option>
+                <option value="Slightly Damaged Packaging">Slightly Damaged Packaging</option>
+              </select>
+            </td>
+            <td><label for="expiryDate">Expiry Date</label></td>
+            <td><input type="date" id="expiryDate" required></td>
+          </tr>
+          <tr>
+            <td colspan="1"><label for="description">Description</label></td>
+            <td colspan="3"><textarea id="description" rows="3" required placeholder="Provide details about the item..."></textarea></td>
+          </tr>
+          <tr>
+            <td><label for="quantity">Quantity Available</label></td>
+            <td><input type="number" id="quantity" min="0" step="1" required placeholder="e.g., 10"></td>
+            <td><label for="price">Selling Price ($)</label></td>
+            <td><input type="number" id="price" step="0.01" min="0" required placeholder="e.g., 1.99"></td>
+          </tr>
+          <tr>
+            <td><label for="originalPrice">Original Price ($)</label></td>
+            <td><input type="number" id="originalPrice" step="0.01" min="0" required placeholder="e.g., 4.99"></td>
+            <td><label for="location">Pick-up Location</label></td>
+            <td><input id="location" required placeholder="Your store address, city"></td>
+          </tr>
+          <tr>
+            <td><label for="image">Upload Image (Optional)</label></td>
+            <td colspan="3"><input type="file" id="image" accept="image/*"></td>
+          </tr>
+          <tr>
+            <td colspan="4" style="text-align:center; padding-top: 15px;">
+              <button type="submit" id="save-listing-button">Save Listing</button>
+              <button type="button" id="clear-form-button" class="cta-button-secondary">Clear Form</button>
+              <p id="form-status" class="form-status" style="display:none; margin-top: 15px;"></p>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </section> <section class="dashboard-section">
+      <h2>My Food Listings</h2>
+      <div id="vendor-listings-container"><p style="text-align: center;">Loading your listings…</p></div>
+    </section> <section class="dashboard-section">
+        <h2>Orders Received</h2>
+        <div id="vendor-orders"><p style="text-align: center;">Loading received orders…</p></div>
+    </section> </div> </div> </main>
+
+<footer style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 15px 20px;">
+    <nav>
+      <ul style="display: flex; flex-wrap: wrap; list-style: none; padding: 0; margin: 0;">
+        <li style="margin-right: 15px;"><a href="about-us.html">About Us</a></li>
+        <li style="margin-right: 15px;"><a href="faq.html">FAQ</a></li>
+        <li style="margin-right: 15px;"><a href="contact.html">Contact</a></li>
+        <li style="margin-right: 15px;"><a href="privacy-policy.html">Privacy Policy</a></li>
+        <li style="margin-right: 15px;"><a href="terms-of-service.html">Terms of Service</a></li>
+        <li style="margin-right: 15px;"><a href="our-impact.html">Our Impact</a></li>
+        <li style="margin-right: 15px;"><a href="success-stories.html">Success Stories</a></li>
+        <li style="margin-right: 15px;"><a href="resources.html">Local Food Waste Resources</a></li>
+      </ul>
+    </nav>
+    <p style="margin-left:auto;font-size:0.9rem; text-align: right; margin-top: 10px; width: 100%; box-sizing: border-box;">&copy; <span id="year"></span>&nbsp;Demeter Marketplace. All rights reserved.</p>
+</footer>
+
+<script>
+/* ==========================================================
+   Configuration (API Keys should be secured)
+========================================================== */
+// URLs and Keys for AppSync APIs
+const ordersApiUrl      = 'https://uoqhw7d2ozclbfqs4jcjafhlzy.appsync-api.us-east-1.amazonaws.com/graphql';
+const ordersApiKey      = 'da2-aze7xizn6zbefmoc4qt3svsjtq'; // API Key for OrdersAPI
+const vendorApiUrl      = 'https://ysiw2hpfvvdivjqw4bqxe7z43e.appsync-api.us-east-1.amazonaws.com/graphql';
+const vendorApiKey      = 'da2-phy2dvcxrnfyrl627frcrorfli'; // API Key for VendorAPI (Create/Update/Delete Food)
+const foodItemsApiUrl   = 'https://423dqtssufh3zafje2juqy7d7i.appsync-api.us-east-1.amazonaws.com/graphql';
+const foodItemsApiKey   = 'da2-hqc7j2vsmragnjlprebm4nyxiy'; // API Key for FoodItemsAPI (Read Food)
+
+/* ==========================================================
+   Shared Helper Functions
+========================================================== */
+/**
+ * Performs a GraphQL query using fetch.
+ * Includes basic validation and error handling.
+ * @param {string} url - The GraphQL endpoint URL.
+ * @param {string} key - The API key for authentication.
+ * @param {string} query - The GraphQL query string.
+ * @param {object} [variables={}] - Optional variables for the query.
+ * @returns {Promise<object>} - The data object from the GraphQL response.
+ */
+async function gql(url, key, query, variables = {}) {
+    // Basic validation
+    if (!url || !key) {
+        const errorMsg = "GraphQL API URL or Key is missing.";
+        console.error(errorMsg);
+        throw new Error(errorMsg);
+    }
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': key // Using API Key authentication
+            },
+            body: JSON.stringify({ query, variables })
+        });
+
+        // Check for HTTP errors
+        if (!response.ok) {
+            let errorBody = 'Could not read error response body.';
+            try { errorBody = await response.text(); } catch (e) { /* Ignore */ }
+            console.error(`HTTP Error: ${response.status} ${response.statusText}`, errorBody);
+            throw new Error(`Network request failed: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        // Check for GraphQL errors
+        if (result.errors) {
+            console.error('GraphQL Errors Received:', JSON.stringify(result.errors, null, 2));
+            const errorMessage = result.errors.map(e => e.message || 'Unknown GraphQL error').join('; ');
+            throw new Error(`GraphQL Error: ${errorMessage}`);
+        }
+
+        // Ensure data field exists
+        if (!('data' in result)) {
+            console.warn("No 'data' field in GraphQL response:", result);
+            throw new Error("Invalid GraphQL response structure.");
+        }
+        return result.data;
+
+    } catch (error) {
+        console.error('GraphQL request failed:', { url, query: query.substring(0,100)+'...', variables, error });
+        // Re-throw a consistent error type
+        throw new Error(error.message || 'An unexpected error occurred during the API request.');
+    }
+}
+
+// **** ADDED: localStorage Helper Functions ****
+/**
+ * Gets an item from localStorage.
+ * @param {string} key - The key of the item to retrieve.
+ * @returns {string|null} - The value from localStorage or null if not found.
+ */
+const StorageGet = key => localStorage.getItem(key);
+
+/**
+ * Clears all items from localStorage.
+ */
+const StorageClear = () => localStorage.clear();
+
+
+/* ==========================================================
+   Orders Received Logic
+========================================================== */
+/**
+ * Loads and displays orders received by the specified vendor.
+ * @param {string} vendorId - The ID of the currently logged-in vendor.
+ */
+async function loadOrders(vendorId){
+  const ordersContainer = document.getElementById('vendor-orders');
+  if (!ordersContainer) { console.error("Orders container ('vendor-orders') not found."); return; }
+  ordersContainer.innerHTML = '<p style="text-align: center;">Loading received orders…</p>';
+
+  // GraphQL query to list orders (adjust based on your schema, might need index for vendorId filtering)
+  // Assuming client-side filtering for now if direct filtering isn't available/indexed.
+  const query = `
+    query ListOrders($limit: Int) {
+      listDemeterOrders(limit: $limit) {
+        items {
+          id
+          customerId
+          customerName # Assuming this field exists
+          orderDate
+          status
+          total
+          vendorId # Crucial for filtering
+          # Add other relevant fields like order items if needed
+        }
+      }
+    }`;
+  const variables = { limit: 500 }; // Fetch a reasonable number of recent orders
+
+  try {
+    // Use the Orders API endpoint and key
+    const data = await gql(ordersApiUrl, ordersApiKey, query, variables);
+    const allOrders = data?.listDemeterOrders?.items || [];
+
+    if (allOrders.length === 0) {
+      ordersContainer.innerHTML = '<p style="text-align: center;">No orders found in the system.</p>';
+      return;
+    }
+
+    // Filter orders for the current vendor client-side
+    const vendorOrders = allOrders.filter(o => o && o.vendorId === vendorId);
+
+    if (vendorOrders.length === 0) {
+      ordersContainer.innerHTML = '<p style="text-align: center;">No orders received for this vendor yet.</p>';
+      return;
+    }
+
+    // Sort orders by date, newest first
+    vendorOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+
+    // Build the HTML table for the orders
+    let html = `
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer Name</th>
+              <th>Order Date</th>
+              <th>Status</th>
+              <th>Total ($)</th>
+              <th>Order ID</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+    vendorOrders.forEach(o => {
+      html += `
+        <tr>
+          <td>${o.customerName || o.customerId || 'N/A'}</td>
+          <td>${o.orderDate ? new Date(o.orderDate).toLocaleString() : 'N/A'}</td>
+          <td>${o.status || 'N/A'}</td>
+          <td>$${(o.total !== null && !isNaN(o.total)) ? Number(o.total).toFixed(2) : 'N/A'}</td>
+          <td>${o.id || 'N/A'}</td>
+        </tr>`;
+    });
+
+    html += '</tbody></table></div>';
+    ordersContainer.innerHTML = html;
+
+  } catch(e) {
+    console.error('Error loading orders:', e);
+    ordersContainer.innerHTML = `<p class="error-message-inline" style="text-align: center;">Could not load orders: ${e.message}</p>`;
+  }
+}
+
+
+/* ==========================================================
+   Vendor Food Listings Logic
+========================================================== */
+let vendorListingsData = []; // Cache for the vendor's listings
+
+/**
+ * Fetches and renders the current vendor's food listings.
+ * Uses FoodItemsAPI for reading.
+ * @param {string} vendorId - The ID of the currently logged-in vendor.
+ */
+async function renderListings(vendorId) {
+    const listingsContainer = document.getElementById('vendor-listings-container');
+    if (!listingsContainer) { console.error("Listings container ('vendor-listings-container') not found."); return; }
+    listingsContainer.innerHTML = '<p style="text-align: center;">Loading your listings…</p>';
+
+    // GraphQL query to list items filtered by vendorId
+    const query = `
+        query ListItemsByVendor($vendorId: String!, $limit: Int) {
+            listDemeterFoodItems(filter: { vendorId: { eq: $vendorId } }, limit: $limit) {
+                items {
+                    id
+                    name
+                    category
+                    condition
+                    description
+                    expiryDate
+                    image # Assuming this stores the filename or S3 key part
+                    location
+                    quantity
+                    price
+                    originalPrice
+                    vendorId
+                    vendorName
+                    createdAt # Useful for sorting maybe
+                }
+            }
+        }
+    `;
+    const variables = { vendorId: vendorId, limit: 100 }; // Limit number of listings shown initially
+
+    try {
+        // Use the FoodItems API for reading listings
+        const result = await gql(foodItemsApiUrl, foodItemsApiKey, query, variables);
+        const items = result?.listDemeterFoodItems?.items;
+
+        if (!items || items.length === 0) {
+            vendorListingsData = []; // Clear cache
+            listingsContainer.innerHTML = '<p style="text-align: center;">You have not listed any food items yet. Use the form above to add one!</p>';
+            return;
+        }
+
+        // Store fetched data
+        vendorListingsData = items;
+
+        // Sort items (e.g., by expiry date, then name)
+        items.sort((a, b) => {
+            const dateA = a.expiryDate ? new Date(a.expiryDate).getTime() : Infinity; // Push null dates to end
+            const dateB = b.expiryDate ? new Date(b.expiryDate).getTime() : Infinity;
+            if (dateA !== dateB) return dateA - dateB; // Sort by date first
+            return (a.name || '').localeCompare(b.name || ''); // Then by name
+        });
+
+        // Generate HTML for each listing item
+        listingsContainer.innerHTML = items.map(i => `
+            <div class="listing-item" id="listing-${i.id}">
+                <img src="${i.image ? `../assets/photos/${i.image}` : '../assets/photos/placeholder.png'}"
+                     alt="${i.name || 'Food item image'}"
+                     onerror="this.onerror=null; this.src='../assets/photos/placeholder.png'; console.warn('Image failed to load: ${i.image}');">
+
+                <div class="listing-details">
+                    <h3>${i.name || 'Unnamed Item'}</h3>
+                    <p><strong>ID:</strong> ${i.id}</p>
+                    <p><strong>Category:</strong> ${i.category || 'N/A'} | <strong>Condition:</strong> ${i.condition || 'N/A'}</p>
+                    <p>${i.description || 'No description provided.'}</p>
+                    <p><strong>Expires:</strong> ${i.expiryDate ? new Date(i.expiryDate).toLocaleDateString() : 'N/A'}</p>
+                    <p><strong>Location:</strong> ${i.location || 'N/A'}</p>
+                    <p>
+                        <strong>Qty:</strong> ${i.quantity !== null ? i.quantity : 'N/A'} |
+                        <strong>Price:</strong> $${(i.price !== null && !isNaN(i.price)) ? Number(i.price).toFixed(2) : 'N/A'}
+                        (Orig $${(i.originalPrice !== null && !isNaN(i.originalPrice)) ? Number(i.originalPrice).toFixed(2) : 'N/A'})
+                    </p>
+                </div>
+                <div class="listing-actions">
+                    <button class="cta-button-secondary" onclick="editListing('${i.id}')">Edit</button>
+                    <button class="cta-button-secondary" style="background-color:#e53e3e; color:white;" onclick="deleteListing('${i.id}')">Delete</button>
+                </div>
+            </div>`).join('');
+
+    } catch (e) {
+        console.error("Error fetching listings:", e);
+        listingsContainer.innerHTML = `<p class="error-message-inline" style="text-align: center;">Could not load your listings: ${e.message}</p>`;
+    }
+}
+
+/* ==========================================================
+   CRUD Mutations (Create/Update/Delete Food Items)
+   Uses VendorAPI
+========================================================== */
+/**
+ * Creates or updates a food item using the VendorAPI.
+ * @param {object} input - The input object matching Create/UpdateDemeterFoodItemsInput.
+ * @param {boolean} isEdit - True if updating an existing item, false if creating.
+ * @returns {Promise<object>} - The result from the GraphQL mutation.
+ */
+async function upsertItem(input, isEdit) {
+    // Choose the correct mutation based on whether it's an edit or create
+    const mutation = isEdit ?
+        `mutation UpdateItem($input: UpdateDemeterFoodItemsInput!) {
+            updateDemeterFoodItems(input: $input) {
+                id # Return ID on success
+                name # Maybe return other fields to confirm update
+            }
+        }` :
+        `mutation CreateItem($input: CreateDemeterFoodItemsInput!) {
+            createDemeterFoodItems(input: $input) {
+                id # Return ID of the newly created item
+                name
+            }
+        }`;
+    // Use the Vendor API endpoint and key for mutations
+    return gql(vendorApiUrl, vendorApiKey, mutation, { input });
+}
+
+/**
+ * Deletes a food item using the VendorAPI.
+ * @param {string} id - The ID of the food item to delete.
+ * @returns {Promise<object>} - The result from the GraphQL mutation.
+ */
+async function removeItem(id) {
+    // GraphQL mutation for deleting an item
+    const mutation = `
+        mutation DeleteItem($input: DeleteDemeterFoodItemsInput!) {
+            deleteDemeterFoodItems(input: $input) {
+                id # Return the ID of the deleted item to confirm
+            }
+        }`;
+    const input = { id: id }; // Input requires the ID of the item to delete
+    // Use the Vendor API endpoint and key for deletion
+    return gql(vendorApiUrl, vendorApiKey, mutation, { input });
+}
+
+/* ==========================================================
+   Form Logic (Add/Edit Food Item Form)
+========================================================== */
+const foodItemForm = document.getElementById('foodItemForm');
+const formStatusElement = document.getElementById('form-status');
+const saveListingButton = document.getElementById('save-listing-button');
+const clearFormButton = document.getElementById('clear-form-button');
+
+/**
+ * Clears the food item form fields and status messages.
+ */
+function clearForm() {
+    if (foodItemForm) {
+        foodItemForm.reset(); // Reset all form fields
+        // Clear hidden fields specifically
+        const itemIdInput = document.getElementById('itemId');
+        if (itemIdInput) itemIdInput.value = '';
+    }
+    if (formStatusElement) {
+        formStatusElement.textContent = '';
+        formStatusElement.style.display = 'none';
+        formStatusElement.className = 'form-status'; // Reset class
+    }
+    if (saveListingButton) {
+        saveListingButton.textContent = 'Save Listing';
+        saveListingButton.disabled = false; // Re-enable button
+    }
+}
+
+// Attach event listener for the clear button
+if (clearFormButton) {
+    clearFormButton.addEventListener('click', clearForm);
+} else { console.warn("Clear form button not found."); }
+
+// Attach event listener for form submission
+if (foodItemForm && formStatusElement && saveListingButton) {
+    foodItemForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevent default submission
+
+        // **** MODIFIED: Use localStorage helper ****
+        const currentVendorId = StorageGet('currentUserId');
+        const currentVendorName = StorageGet('currentUserName');
+
+        // Check if vendor is identified
+        if (!currentVendorId) {
+            formStatusElement.textContent = 'Error: Vendor ID not found. Please sign in again.';
+            formStatusElement.className = 'form-status error-message-inline';
+            formStatusElement.style.display = 'block';
+            return;
+        }
+
+        // Determine if we are editing an existing item or creating a new one
+        const itemIdInput = document.getElementById('itemId');
+        const isEditMode = !!itemIdInput?.value;
+
+        // Construct the input object for the mutation
+        // Ensure field names match the GraphQL input type (Create/UpdateDemeterFoodItemsInput)
+        const input = {
+            name: document.getElementById('name').value.trim(),
+            category: document.getElementById('category').value,
+            condition: document.getElementById('condition').value,
+            description: document.getElementById('description').value.trim(),
+            expiryDate: document.getElementById('expiryDate').value, // Should be YYYY-MM-DD
+            // Handle image file name (basic handling, assumes direct storage or further processing)
+            image: document.getElementById('image').files[0] ? document.getElementById('image').files[0].name : null,
+            location: document.getElementById('location').value.trim(),
+            originalPrice: parseFloat(document.getElementById('originalPrice').value),
+            price: parseFloat(document.getElementById('price').value),
+            quantity: parseInt(document.getElementById('quantity').value, 10),
+        };
+
+        // Add ID only if in edit mode
+        if (isEditMode) {
+            input.id = itemIdInput.value;
+        } else {
+            // Add vendor details only when creating a new item
+            input.vendorId = currentVendorId;
+            input.vendorName = currentVendorName || 'Unknown Vendor'; // Use stored name or default
+        }
+
+        // Client-side validation
+        if (!input.name || !input.category || !input.condition || !input.expiryDate || !input.location) {
+             formStatusElement.textContent = 'Please fill in all required fields (Name, Category, Condition, Expiry, Location).';
+             formStatusElement.className = 'form-status error-message-inline';
+             formStatusElement.style.display = 'block'; return;
+        }
+        if (isNaN(input.originalPrice) || isNaN(input.price) || isNaN(input.quantity) || input.quantity < 0 || input.price < 0 || input.originalPrice < 0) {
+             formStatusElement.textContent = 'Please enter valid, non-negative numbers for Prices and Quantity.';
+             formStatusElement.className = 'form-status error-message-inline';
+             formStatusElement.style.display = 'block'; return;
+        }
+
+        // Update UI to indicate processing
+        saveListingButton.disabled = true;
+        saveListingButton.textContent = isEditMode ? 'Updating…' : 'Adding…';
+        formStatusElement.textContent = 'Processing…';
+        formStatusElement.className = 'form-status'; // Neutral style
+        formStatusElement.style.display = 'block';
+
+        try {
+            // Call the upsert function (uses VendorAPI)
+            const result = await upsertItem(input, isEditMode);
+            console.log("Upsert result:", result); // Log success result
+
+            formStatusElement.textContent = `Item ${isEditMode ? 'updated' : 'added'} successfully!`;
+            formStatusElement.className = 'form-status success-message'; // Success style
+            clearForm(); // Clear the form on success
+            renderListings(currentVendorId); // Refresh the listings view
+
+        } catch (e) {
+            // Display error message from gql helper
+            formStatusElement.textContent = `Error: ${e.message}`;
+            formStatusElement.className = 'form-status error-message-inline'; // Error style
+            console.error("Error saving item:", e); // Log detailed error
+
+        } finally {
+            // Re-enable button, ensure text is correct if form wasn't cleared (e.g., on error)
+           if (!foodItemForm.itemId.value) { // If it was a create attempt or cleared edit
+                saveListingButton.textContent = 'Save Listing';
+           } else { // If it was an edit attempt that failed
+                saveListingButton.textContent = 'Update Listing';
+           }
+            saveListingButton.disabled = false;
+        }
+    });
+} else { console.error("Food item form ('foodItemForm') not found."); }
+
+/* ==========================================================
+   Edit / Delete Button Actions
+========================================================== */
+/**
+ * Populates the form with data from the selected listing for editing.
+ * @param {string} id - The ID of the listing item to edit.
+ */
+function editListing(id) {
+    // Find the item data from the cached list
+    const itemToEdit = vendorListingsData.find(item => item.id === id);
+    if (!itemToEdit) {
+        alert('Could not find item data to edit. Please refresh the listings.');
+        console.error(`Item with ID ${id} not found in vendorListingsData.`);
+        return;
+    }
+    if (!foodItemForm) { console.error("Cannot edit: Food item form not found."); return; }
+
+    // Populate form fields
+    document.getElementById('itemId').value = itemToEdit.id; // Set the hidden ID field
+    document.getElementById('name').value = itemToEdit.name || '';
+    document.getElementById('category').value = itemToEdit.category || '';
+    document.getElementById('condition').value = itemToEdit.condition || '';
+    document.getElementById('description').value = itemToEdit.description || '';
+    document.getElementById('expiryDate').value = itemToEdit.expiryDate || ''; // Assumes YYYY-MM-DD format
+    document.getElementById('location').value = itemToEdit.location || '';
+    document.getElementById('originalPrice').value = itemToEdit.originalPrice !== null ? itemToEdit.originalPrice : '';
+    document.getElementById('price').value = itemToEdit.price !== null ? itemToEdit.price : '';
+    document.getElementById('quantity').value = itemToEdit.quantity !== null ? itemToEdit.quantity : '';
+    document.getElementById('image').value = ''; // Clear file input
+
+    // Update button text and status message
+    if(saveListingButton) saveListingButton.textContent = 'Update Listing';
+    if(formStatusElement) {
+        formStatusElement.textContent = `Editing item: “${itemToEdit.name || 'Unnamed Item'}” (ID: ${itemToEdit.id})`;
+        formStatusElement.className = 'form-status'; // Neutral style
+        formStatusElement.style.display = 'block';
+    }
+
+    // Scroll the form into view for better UX
+    foodItemForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/**
+ * Handles the deletion of a listing item after confirmation.
+ * Uses VendorAPI for deletion.
+ * @param {string} id - The ID of the listing item to delete.
+ */
+async function deleteListing(id) {
+    // Find item details for confirmation message
+    const itemToDelete = vendorListingsData.find(item => item.id === id);
+    const itemName = itemToDelete ? `“${itemToDelete.name || 'Unnamed Item'}” (ID: ${id})` : `item with ID: ${id}`;
+
+    // Confirm deletion with the user
+    if (!confirm(`Are you sure you want to permanently delete ${itemName}? This action cannot be undone.`)) {
+        return; // User cancelled
+    }
+
+    // **** MODIFIED: Use localStorage helper ****
+    const currentVendorId = StorageGet('currentUserId');
+    if (!currentVendorId) {
+        alert("Could not verify vendor identity. Please sign in again.");
+        return;
+    }
+
+    // Disable buttons on the item being deleted? (Optional UX improvement)
+    const listingElement = document.getElementById(`listing-${id}`);
+    const deleteButton = listingElement?.querySelector('button[onclick^="deleteListing"]');
+    if(deleteButton) deleteButton.disabled = true;
+
+
+    try {
+        // Call the removeItem function (uses VendorAPI)
+        const result = await removeItem(id);
+        console.log("Delete result:", result); // Log success result
+
+        // Refresh the listings view to remove the deleted item
+        renderListings(currentVendorId);
+        // Optionally show a success message (could use formStatusElement or a dedicated area)
+        // alert(`${itemName} deleted successfully.`);
+
+    } catch (e) {
+        alert(`Error deleting item: ${e.message}`);
+        console.error("Error deleting item:", e);
+        // Re-enable button on failure
+        if(deleteButton) deleteButton.disabled = false;
+    }
+}
+
+
+/* ==========================================================
+   Authentication Check & Initial Page Load
+========================================================== */
+/**
+ * Initializes the page on DOMContentLoaded event.
+ * Checks authentication status using localStorage and loads relevant data for Vendors.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Set the current year in the footer
+    const yearSpan = document.getElementById('year');
+    if (yearSpan) {
+        yearSpan.textContent = new Date().getFullYear();
+    } else { console.warn("Footer year span not found."); }
+
+    // **** MODIFIED: Use localStorage consistently ****
+    const currentUserId = StorageGet('currentUserId');
+    const currentUserName = StorageGet('currentUserName');
+    const currentUserRole = StorageGet('currentUserRole');
+
+    // Get references to main content and error message areas
+    const dashboardContent = document.getElementById('dashboard-content');
+    const authErrorMessage = document.getElementById('auth-error-message');
+    const welcomeVendorName = document.getElementById('welcome-vendor-name'); // Specific welcome element
+
+    // Check if essential elements exist
+    if (!dashboardContent || !authErrorMessage || !welcomeVendorName) {
+        console.error("Essential dashboard elements are missing from the HTML (dashboard-content, auth-error-message, or welcome-vendor-name).");
+        if(authErrorMessage) {
+            authErrorMessage.textContent = "Page loading error. Please contact support.";
+            authErrorMessage.style.display = 'block';
+        }
+        return; // Stop initialization
+    }
+
+    // Check if user is logged in and has the 'Vendor' role
+    if (currentUserId && currentUserRole === 'Vendor') {
+        // User is authenticated and authorized as Vendor
+        dashboardContent.style.display = 'block'; // Show dashboard
+        authErrorMessage.style.display = 'none'; // Hide error message
+        welcomeVendorName.textContent = currentUserName || 'Vendor'; // Set welcome message
+
+        // Set hidden form fields with vendor ID and Name for convenience
+        const hiddenVendorIdInput = document.getElementById('currentVendorId');
+        const hiddenVendorNameInput = document.getElementById('currentVendorName');
+        if (hiddenVendorIdInput) hiddenVendorIdInput.value = currentUserId;
+        if (hiddenVendorNameInput) hiddenVendorNameInput.value = currentUserName || '';
+
+        // Load initial data for the vendor dashboard
+        renderListings(currentUserId); // Load vendor's food listings
+        loadOrders(currentUserId);     // Load orders received by this vendor
+
+    } else {
+        // User is not logged in or has the wrong role
+        dashboardContent.style.display = 'none'; // Hide dashboard
+        // Display specific error message
+        if (currentUserId) { // Logged in, but wrong role
+            authErrorMessage.textContent = `Access Denied. Your role ("${currentUserRole || 'Unknown'}") is not authorized. Please sign in as a Vendor.`;
+        } else { // Not logged in
+            authErrorMessage.textContent = 'Access Denied. Please sign in as a Vendor to view this page.';
+        }
+        authErrorMessage.style.display = 'block'; // Show the error
+        authErrorMessage.innerHTML += ' <a href="signin.html" style="font-weight: bold;">Sign In Here</a>'; // Add sign-in link
+        console.warn(`Access denied for Vendor page: User ID: ${currentUserId}, Role: ${currentUserRole}`);
+    }
+
+    // Setup Sign Out button functionality
+    const signOutButton = document.getElementById('signOutButton');
+    if (signOutButton) {
+        signOutButton.addEventListener('click', () => { // Use addEventListener for consistency
+            // **** MODIFIED: Clear localStorage consistently ****
+            StorageClear(); // Clear localStorage on sign out
+            window.location.href = 'signin.html'; // Redirect to sign-in page
+        });
+    } else {
+        console.error("Sign out button ('signOutButton') not found.");
+    }
+});
+
+</script>
+</body>
+</html>

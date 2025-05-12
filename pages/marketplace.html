@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marketplace | Demeter</title>
+
+  <link rel="stylesheet" href="../styles/home_page.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.css" rel="stylesheet" />
+  <style>
+    body {
+        font-family: 'Montserrat', sans-serif;
+        margin: 1in; 
+        padding: 0;
+        display: flex; 
+        flex-direction: column; 
+        min-height: 100vh; 
+    }
+
+    #map-container {
+        flex: 1; 
+        min-height: 500px; 
+        width: 100%;
+    }
+
+    #map {
+        height: 500px;
+        width: 100%;
+    }
+
+    #content-container {
+        flex: 1; 
+        display: flex;
+        flex-direction: column; 
+        margin-top: 20px; 
+    }
+
+    #search-container {
+        margin-bottom: 10px;
+    }
+
+    input[type="text"] {
+        padding: 8px;
+        margin-bottom: 10px;
+        width: 200px;
+        box-sizing: border-box;
+        display: block; 
+        margin-top: 5px; 
+    }
+
+    button {
+        margin-top: 10px; 
+    }
+
+    #table-container {
+        width: 100%;
+        margin-top: 10px;
+        flex-grow: 1; 
+        overflow-y: auto; 
+        max-height: 900px; 
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        cursor: pointer;
+    }
+
+    th.sortable::after {
+        content: " ↑↓";
+        font-size: 0.8em;
+        color: #aaa;
+    }
+
+    th.sortable.asc::after {
+        content: " ↑";
+        color: green;
+    }
+
+    th.sortable.desc::after {
+        content: " ↓";
+        color: red;
+    }
+
+    header {
+        padding: 10px 20px;
+        text-align: center; 
+        margin-bottom: 20px; 
+    }
+
+    footer {
+        padding: 10px 20px;
+        margin-top: 20px; 
+    }
+
+    .navbar .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .nav-links {
+        list-style: none;
+        display: flex;
+        gap: 15px;
+        padding: 0;
+        margin: 0;
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        color: #333;
+    }
+
+    .auth-switch {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+  <!-- ---------- NAVBAR ---------- -->
+
+  <header style="display: flex; align-items: center; justify-content: space-between;">
+    <img src="../assets/photos/demeter_logo_png.png" alt="Demeter Logo" class="logo-icon" />
+    <nav style="display: flex; list-style: none; padding: 0; margin: 0;">
+      <li style="margin-right: 15px;"><a href="../index.html" id="signOutLink">Sign&nbsp;Out</a></li>
+    </nav>
+  </header>
+
+  <h1>Demeter Marketplace Food Listings</h1>
+
+  <!-- ---------- MAIN CONTENT (map + table) ---------- -->
+  <main style="display:flex;flex-direction:column;flex-grow:1;">
+    <!-- Map and content containers (unchanged) -->
+    <div id="map-container"><div id="map"></div></div>
+    <div id="content-container">
+      <!-- search, table, etc. (unchanged) -->
+      <div id="search-container">
+        <label for="search"><strong>Search by Category of Food Available:</strong></label>
+        <input type="text" id="search" placeholder="Search by Category" />
+        <button id="searchButton">Search</button>
+      </div>
+      <div id="table-container">
+        <table id="foodTable">
+          <thead>
+            <tr>
+              <th onclick="sortTable(0)" class="sortable">Name</th>
+              <th onclick="sortTable(1)" class="sortable">Category</th>
+              <th onclick="sortTable(2)" class="sortable">Expiry Date</th>
+              <th onclick="sortTable(3)" class="sortable">Location</th>
+              <th onclick="sortTable(4)" class="sortable">Vendor Name</th>
+              <th onclick="sortTable(5)" class="sortable">Condition</th>
+              <th onclick="sortTable(6)" class="sortable">Quantity</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- ---------- FOOTER ---------- -->
+  <footer style="display: flex; align-items: center; justify-content: space-between;">
+    <nav style="display: flex; list-style: none; padding: 0; margin: 0;">
+      <li style="margin-right: 15px;"><a href="about-us.html">About Us</a></li>
+      <li style="margin-right: 15px;"><a href="faq.html">FAQ</a></li>
+      <li style="margin-right: 15px;"><a href="contact.html">Contact</a></li>
+      <li style="margin-right: 15px;"><a href="privacy-policy.html">Privacy Policy</a></li>
+      <li style="margin-right: 15px;"><a href="terms-of-service.html">Terms of Service</a></li>
+      <li style="margin-right: 15px;"><a href="our-impact.html">Our Impact</a></li>
+      <li style="margin-right: 15px;"><a href="success-stories.html">Success Stories</a></li>
+      <li style="margin-right: 15px;"><a href="resources.html">Local Food Waste Resources</a></li>
+    </nav>
+  </footer>
+
+  <!-- ---------- LIBRARIES ---------- -->
+  <script src="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1614.0.min.js"></script>
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+    <script>
+        const apiUrl = 'https://423dqtssufh3zafje2juqy7d7i.appsync-api.us-east-1.amazonaws.com/graphql';
+        const apiKey = 'da2-hqc7j2vsmragnjlprebm4nyxiy';
+        const mapApiKey = "v1.public.eyJqdGkiOiIyMzY2OWZjMC0zODRiLTRmYTItYWZiNi02MjRiYjliNjJlNjMifWtbEJVV0Of4i97XkzJwAOjZxnDZsG4l1RTaXNscBYVF-uoSfiZnUxLTZ6MVTXyrQpiCMNEbE4Mtrlz3xn-Y_hQgZYky7dUxMOcnTDnycdHu_9LRs0vXlbpPda6oG2KAV1w--5eQg2EE8iXvCt5AEgh5Kewf4lChuvcPyo8hrTVOCexgNom23tB09fzBqpI2WyrPqFwuo8viMlUiQGdAqNvfXY98y1VEwHNoyK5orJiXfAkrMLnn_k1uLcB-Kf9vxh0wZIhzUJq-TMoYX58gXlEZRkULjQzHfqTN90UYJMoKBUzIs9Zbji1_dVgxKqvka6KFgk5EDyYSWNmlXF1e-qk.ZWU0ZWIzMTktMWRhNi00Mzg0LTllMzYtNzlmMDU3MjRmYTkx";
+        const mapName = "DemeterFoodMap";
+        const region = "us-east-1";
+
+        let data = [];
+        let sortColumn = null;
+        let sortDirection = 'asc';
+        let map;
+        let timeoutId;
+        const debounceDelay = 300; 
+
+        async function fetchData() {
+            try {
+                const graphqlQuery = `
+                    query ListDemeterFoodItems {
+                        listDemeterFoodItems {
+                            items {
+                                id
+                                vendorId
+                                name
+                                category
+                                composterAvailability
+                                expiryDate
+                                geohash
+                                location
+                                vendorName
+                                condition
+                                quantity
+                                lon
+                                lat
+                            }
+                        }
+                    }
+                `;
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                    },
+                    body: JSON.stringify({ query: graphqlQuery })
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const responseData = await response.json();
+                data = responseData.data.listDemeterFoodItems.items;
+                renderTable(data);
+                initMap(data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.getElementById("tableBody").innerHTML = `<tr><td colspan="13">Error loading data.</td></tr>`;
+            }
+        }
+
+        function renderTable(items) {
+            const tableBody = document.getElementById("tableBody");
+            tableBody.innerHTML = items.map(item => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.category}</td>
+                    <td>${item.expiryDate}</td>
+                    <td>${item.location}</td>
+                    <td>${item.vendorName}</td>
+                    <td>${item.condition}</td>
+                    <td>${item.quantity}</td>
+                </tr>
+            `).join('');
+        }
+
+        function initMap(foodItems) {
+            map = new maplibregl.Map({
+                container: "map",
+                style: `https://maps.geo.${region}.amazonaws.com/maps/v0/maps/${mapName}/style-descriptor?key=${mapApiKey}`,
+                center: [-76.61099, 39.28619],
+                zoom: 15,
+            });
+            map.addControl(new maplibregl.NavigationControl(), "top-left");
+
+            map.on('load', () => addMarkersToMap(foodItems));
+        }
+
+        function addMarkersToMap(foodItems) {
+            const bounds = new maplibregl.LngLatBounds();
+            foodItems.forEach(item => {
+                const lat = parseFloat(item.lat);
+                const lon = parseFloat(item.lon);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    new maplibregl.Marker({ color: 'blue' })
+                        .setLngLat([lon, lat])
+                        .addTo(map);
+                    bounds.extend([lon, lat]);
+                }
+            });
+            if (bounds.isValid()) map.fitBounds(bounds, { padding: 50 });
+        }
+
+        function sortTable(columnIndex) {
+            sortDirection = columnIndex === sortColumn ? (sortDirection === 'asc' ? 'desc' : 'asc') : 'asc';
+            sortColumn = columnIndex;
+
+            const sortedData = [...data].sort((a, b) => {
+                const aValue = Object.values(a)[columnIndex];
+                const bValue = Object.values(b)[columnIndex];
+
+                if (columnIndex === 5) { // Sort by Expiry Date
+                    const dateA = new Date(aValue);
+                    const dateB = new Date(bValue);
+                    return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+                } else {
+                    return typeof aValue === 'string'
+                        ? (sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue))
+                        : (sortDirection === 'asc' ? aValue - bValue : bValue - aValue);
+                }
+            });
+
+            renderTable(sortedData);
+        }
+
+        function filterTable() {
+            const filter = document.getElementById("search").value.toUpperCase();
+            const filteredData = data.filter(item =>
+                item.category.toUpperCase().includes(filter)
+            );
+            renderTable(filteredData);
+        }
+
+        function debouncedFilter() {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(filterTable, debounceDelay);
+        }
+
+        document.addEventListener("DOMContentLoaded", fetchData);
+        document.getElementById("searchButton").addEventListener("click", debouncedFilter);
+    </script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Demeter Marketplace – Sign in</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="../styles/home_page.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Basic styles for form elements */
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0; /* Tailwind gray-300 */
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 1rem; /* Spacing below inputs */
+        }
+
+        /* Styles for the submit buttons */
+        button[type="submit"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem; /* Tailwind rounded-lg */
+            background-color: #3182ce; /* Tailwind blue-600 */
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex; /* For aligning spinner */
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem; /* Space between text and spinner */
+        }
+
+        /* Hover state for buttons */
+        button[type="submit"]:hover:not(:disabled) {
+            background-color: #2b6cb0; /* Tailwind blue-700 */
+        }
+
+        /* Disabled state for buttons */
+        button[type="submit"]:disabled {
+            background-color: #a0aec0; /* Tailwind gray-400 */
+            cursor: not-allowed;
+        }
+
+        /* Styles for error and message text */
+        .message-text {
+            font-size: 0.875rem; /* Tailwind text-sm */
+            margin-top: 1rem;
+            min-height: 1.25em; /* Ensure space even when empty */
+            text-align: center;
+        }
+        .message-text.error { color: #e53e3e; /* Tailwind red-600 */ }
+        .message-text.success { color: #38a169; /* Tailwind green-600 */ }
+
+
+        /* Styles for links */
+        .link-text {
+            font-size: 0.875rem; /* Tailwind text-sm */
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .link-text a {
+            color: #3182ce; /* Tailwind blue-600 */
+            text-decoration: none;
+        }
+        .link-text a:hover { text-decoration: underline; }
+
+        /* Utility class to hide elements */
+        .hidden { display: none; }
+
+        /* Footer paragraph styling */
+        footer p {
+            text-align: right;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+         /* Simple CSS spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            width: 1em;
+            height: 1em;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Form container styling */
+        .form-container {
+             max-width: 500px;
+             margin: 2rem auto;
+             padding: 2rem;
+             background-color: #fff;
+             border-radius: 0.5rem;
+             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+         .form-group {
+            margin-bottom: 1rem; /* Consistent spacing */
+        }
+         label {
+            display: block; /* Ensure labels are above inputs */
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+
+    </style>
+</head>
+<body>
+    <header style="display:flex;align-items:center;justify-content:space-between;">
+        <a href="../index.html" class="logo">
+            <img src="../assets/photos/demeter_logo_png.png" alt="Demeter Logo" class="logo-icon" />
+        </a>
+        <nav style="display:flex;list-style:none;padding:0;margin:0;">
+            <li style="margin-right:15px;"><a href="../index.html">Home</a></li>
+            <li style="margin-right:15px;"><a href="register.html">Register</a></li>
+            </nav>
+    </header>
+
+    <main>
+        <div id="signin-container" class="form-container">
+            <form id="signin-form" autocomplete="on">
+                <h1>Sign in</h1>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" required autocomplete="username" />
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" required autocomplete="current-password" />
+                </div>
+                <button type="submit" id="signInButton">
+                    <span class="button-text">Sign in</span>
+                    <span class="spinner hidden"></span>
+                </button>
+                <p id="signin-message" class="message-text"></p> <p class="link-text"><a href="#" id="forgot-link">Forgot password?</a></p>
+                <p class="link-text" style="margin-top:0.5rem;">Don't have an account? <a href="register.html">Register here</a></p>
+            </form>
+        </div>
+
+        <div id="reset-container" class="form-container hidden">
+            <form id="reset-form" autocomplete="off">
+                <h1>Reset password</h1>
+                <div id="reset-step-1">
+                    <p style="margin-bottom: 1rem;">Enter your email address to receive a password reset code.</p>
+                    <div class="form-group">
+                        <label for="reset-email-input">Email</label>
+                        <input id="reset-email-input" type="email" required autocomplete="username" />
+                    </div>
+                    <button type="submit" id="sendCodeButton">
+                        <span class="button-text">Send Reset Code</span>
+                        <span class="spinner hidden"></span>
+                    </button>
+                     <p id="reset-message-step1" class="message-text"></p>
+                     <p class="link-text"><a href="#" id="back-to-login-step1">Back to sign in</a></p>
+                 </div>
+
+                 <div id="reset-step-2" class="hidden">
+                    <p style="font-size:0.9em;margin-bottom:1rem;">A 6‑digit verification code has been sent to <strong id="reset-email-display"></strong>.</p>
+                    <div class="form-group">
+                        <label for="reset-code">Verification code</label>
+                        <input id="reset-code" type="text" pattern="\d{6}" maxlength="6" required autocomplete="one-time-code" />
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">New password</label>
+                        <input id="new-password" type="password" minlength="8" required autocomplete="new-password" />
+                         <small style="font-size: 0.75rem; color: #555;">Requires 8+ chars, uppercase, lowercase, number, symbol.</small>
+                    </div>
+                    <button type="submit" id="resetPasswordButton">
+                        <span class="button-text">Change password</span>
+                        <span class="spinner hidden"></span>
+                    </button>
+                    <p id="reset-message-step2" class="message-text"></p>
+                    <p class="link-text"><a href="#" id="back-to-login-step2">Back to sign in</a></p>
+                 </div>
+            </form>
+        </div>
+    </main>
+
+    <footer style="display:flex;align-items:center;justify-content:space-between; padding: 1rem 2rem; border-top: 1px solid #eee; margin-top: 2rem;">
+        <nav style="display:flex;list-style:none;padding:0;margin:0;">
+             <li style="margin-right:15px;"><a href="about-us.html">About&nbsp;Us</a></li>
+             <li style="margin-right:15px;"><a href="faq.html">FAQ</a></li>
+             <li style="margin-right:15px;"><a href="contact.html">Contact</a></li>
+             <li style="margin-right:15px;"><a href="privacy-policy.html">Privacy&nbsp;Policy</a></li>
+             <li style="margin-right:15px;"><a href="terms-of-service.html">Terms&nbsp;of&nbsp;Service</a></li>
+             <li style="margin-right:15px;"><a href="our-impact.html">Our&nbsp;Impact</a></li>
+             <li style="margin-right:15px;"><a href="success-stories.html">Success&nbsp;Stories</a></li>
+             <li style="margin-right:15px;"><a href="resources.html">Local&nbsp;Food&nbsp;Waste&nbsp;Resources</a></li>
+        </nav>
+        <p style="margin-left:auto;font-size:0.9rem;">&copy; <span id="current-year"></span>&nbsp;Demeter</p>
+    </footer>
+
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/aws-amplify@4/dist/aws-amplify.min.js"></script>
+    <script>
+        // Set current year in footer
+        document.getElementById("current-year").textContent = new Date().getFullYear();
+
+        // -------- AppSync Configuration (REMOVED - No longer needed for sign-in) --------
+        // const APPSYNC_ENDPOINT = "https://egmaenphbvcv5jvqmxf6c3f6hy.appsync-api.us-east-1.amazonaws.com/graphql";
+        // const APPSYNC_API_KEY  = "da2-6raxosxi4zgvdaxgn26qyujstu";
+        // const GET_USER_BY_EMAIL_QUERY = /* GraphQL */ `...`; // REMOVED
+
+        // ---------- Amplify / Cognito configuration ----------
+        const { Amplify, Auth } = window.aws_amplify;
+        Amplify.configure({
+            Auth: {
+                region: "us-east-1",
+                userPoolId: "us-east-1_NFUnvsdaI",
+                userPoolWebClientId: "sb37s7cf6ld9roa6drove90fl",
+                usernameAttributes: ["email"],
+                authenticationFlowType: "USER_PASSWORD_AUTH",
+                storage: window.localStorage, // Use localStorage consistently
+            },
+             Logger: { LOG_LEVEL: "INFO" } // Keep INFO or set to DEBUG for more detail
+        });
+
+        // -------- DOM Element References --------
+        const signinForm = document.getElementById("signin-form");
+        const resetForm = document.getElementById("reset-form");
+        const signinContainer = document.getElementById("signin-container");
+        const resetContainer = document.getElementById("reset-container");
+        const resetStep1Div = document.getElementById("reset-step-1");
+        const resetStep2Div = document.getElementById("reset-step-2");
+        const signInButton = document.getElementById("signInButton");
+        const sendCodeButton = document.getElementById("sendCodeButton");
+        const resetPasswordButton = document.getElementById("resetPasswordButton");
+        const forgotLink = document.getElementById("forgot-link");
+        const backLinkStep1 = document.getElementById("back-to-login-step1");
+        const backLinkStep2 = document.getElementById("back-to-login-step2");
+        const signinMessageEl = document.getElementById("signin-message");
+        const resetMessageStep1El = document.getElementById("reset-message-step1");
+        const resetMessageStep2El = document.getElementById("reset-message-step2");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const resetEmailInput = document.getElementById("reset-email-input");
+        const resetEmailDisplay = document.getElementById("reset-email-display");
+        const resetCodeInput = document.getElementById("reset-code");
+        const newPasswordInput = document.getElementById("new-password");
+
+        // -------- Helper Functions --------
+        const $ = (id) => document.getElementById(id);
+        const show = (el) => el?.classList.remove("hidden");
+        const hide = (el) => el?.classList.add("hidden");
+
+        function showMessage(element, text, type = "info") {
+            if (!element) return;
+            element.textContent = text;
+            element.className = 'message-text';
+            if (type === 'error') element.classList.add('error');
+            else if (type === 'success') element.classList.add('success');
+        }
+
+        function toggleButtonLoading(button, isLoading) {
+            if (!button) return;
+            const textSpan = button.querySelector('.button-text');
+            const spinnerSpan = button.querySelector('.spinner');
+            button.disabled = isLoading;
+            if (isLoading) {
+                if(textSpan) textSpan.style.display = 'none';
+                if(spinnerSpan) show(spinnerSpan);
+            } else {
+                if(textSpan) textSpan.style.display = 'inline';
+                if(spinnerSpan) hide(spinnerSpan);
+            }
+        }
+
+        // **** REMOVED: callGraphQL function is no longer needed here ****
+        // async function callGraphQL(query, variables) { ... }
+
+        const passwordPolicyRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\^$*.[\]{}()?\-!@#%&/,><':;|_~`+=]).{8,}$/;
+
+        // -------- Event Listeners --------
+
+        // --- Sign In Form Submission ---
+        signinForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            toggleButtonLoading(signInButton, true);
+            showMessage(signinMessageEl, "Signing in...");
+
+            const email = emailInput.value.trim().toLowerCase();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showMessage(signinMessageEl, "Email and password are required.", "error");
+                toggleButtonLoading(signInButton, false);
+                return;
+            }
+
+            try {
+                // Step 1: Authenticate with Cognito using Amplify Auth
+                const cognitoUser = await Auth.signIn(email, password);
+                console.log("Cognito sign in successful:", cognitoUser);
+
+                // Step 2: Get user attributes directly from the Cognito user object
+                // The 'attributes' object contains standard and custom attributes.
+                const attributes = cognitoUser.attributes;
+                console.log("Cognito User Attributes:", attributes);
+
+                // Extract necessary attributes (handle potential missing attributes gracefully)
+                const userId = attributes.sub; // 'sub' is the unique user identifier in Cognito
+                const userName = attributes.name || 'User'; // Use name attribute, default if missing
+                const userEmail = attributes.email; // Email is typically always present
+                const userRole = attributes['custom:role']; // Access custom attribute for role
+
+                // Step 3: Validate essential attributes (especially role for redirection)
+                if (!userId) {
+                    console.error("Cognito user ID (sub) is missing after sign in.");
+                    throw new Error("Authentication failed: User identifier missing.");
+                }
+                 if (!userRole) {
+                    // If role is missing, user cannot be redirected correctly.
+                    // This indicates an issue during registration where the custom:role wasn't set.
+                    console.error(`User ${userId} is missing the 'custom:role' attribute in Cognito.`);
+                    await Auth.signOut(); // Sign out the user as they can't proceed
+                    throw new Error("Sign-in successful, but your user role is not defined. Please contact support or try registering again.");
+                }
+
+                // Step 4: Store essential info retrieved from Cognito into localStorage
+                // Use the same keys as before for consistency with dashboard pages
+                 localStorage.setItem("currentUserId", userId);
+                 localStorage.setItem("currentUserName", userName);
+                 localStorage.setItem("currentUserEmail", userEmail);
+                 localStorage.setItem("currentUserRole", userRole);
+                 console.log("User details stored in localStorage:", { userId, userName, userEmail, userRole });
+
+                // Step 5: Redirect based on the role obtained from Cognito
+                showMessage(signinMessageEl, "Sign in successful! Redirecting...", "success");
+                switch (userRole) {
+                    case "Vendor":
+                        window.location.href = "vendor.html";
+                        break;
+                    case "Customer":
+                        window.location.href = "customer.html";
+                        break;
+                    case "Composter":
+                         window.location.href = "composter.html";
+                         break;
+                    default:
+                        // Handle cases where the role is present but not recognized
+                        console.error(`Unknown user role found in Cognito: ${userRole} for user ${userId}`);
+                        await Auth.signOut(); // Sign out if role is invalid
+                        throw new Error(`An unexpected error occurred with your assigned role (${userRole}). Please contact support.`);
+                }
+
+            } catch (err) {
+                // Handle errors from Auth.signIn or attribute validation
+                console.error("Sign In Error:", err);
+                 let userMessage = "Sign-in failed. Please check your credentials or network connection."; // Default
+
+                 // Use specific Cognito error messages if available
+                 if (err.name === "UserNotFoundException") userMessage = "Incorrect email or password.";
+                 else if (err.name === "NotAuthorizedException") userMessage = "Incorrect email or password."; // Often incorrect password
+                 else if (err.name === "UserNotConfirmedException") userMessage = "Account not verified. Please check your email for a verification code or register again.";
+                 else if (err.code === "NetworkError") userMessage = "Network error. Please check your connection.";
+                 // Use the message from errors thrown in the try block (e.g., missing role)
+                 else if (err.message) userMessage = err.message;
+
+                showMessage(signinMessageEl, userMessage, "error");
+                toggleButtonLoading(signInButton, false); // Re-enable button on failure
+            }
+            // Note: No 'finally' block needed here as redirection happens on success
+        });
+
+        // --- Forgot Password Link Click ---
+        forgotLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            hide(signinContainer);
+            show(resetContainer);
+            show(resetStep1Div);
+            hide(resetStep2Div);
+            resetEmailInput.value = emailInput.value;
+            showMessage(signinMessageEl, "");
+            showMessage(resetMessageStep1El, "");
+            showMessage(resetMessageStep2El, "");
+        });
+
+        // --- Back to Sign In Links Click ---
+        function goBackToSignIn(e) {
+             e.preventDefault();
+             hide(resetContainer);
+             show(signinContainer);
+             showMessage(resetMessageStep1El, "");
+             showMessage(resetMessageStep2El, "");
+        }
+        backLinkStep1.addEventListener("click", goBackToSignIn);
+        backLinkStep2.addEventListener("click", goBackToSignIn);
+
+
+        // --- Reset Form Submission (Handles both steps) ---
+         resetForm.addEventListener("submit", async (e) => {
+             e.preventDefault();
+             const isStep1Active = !resetStep1Div.classList.contains('hidden');
+
+             if (isStep1Active) {
+                 // --- Handle Step 1: Send Reset Code ---
+                 toggleButtonLoading(sendCodeButton, true);
+                 showMessage(resetMessageStep1El, "Sending reset code...");
+                 const email = resetEmailInput.value.trim().toLowerCase();
+                 if (!email) {
+                     showMessage(resetMessageStep1El, "Please enter your email address.", "error");
+                     toggleButtonLoading(sendCodeButton, false); return;
+                 }
+                 try {
+                     await Auth.forgotPassword(email);
+                     resetEmailDisplay.textContent = email;
+                     hide(resetStep1Div);
+                     show(resetStep2Div);
+                     showMessage(resetMessageStep1El, "");
+                     showMessage(resetMessageStep2El, "Reset code sent. Check your email.", "info");
+                     resetCodeInput.focus();
+                 } catch (err) {
+                     console.error("Forgot Password Error (Send Code):", err);
+                     let userMessage = "Failed to send reset code.";
+                     if (err.name === "UserNotFoundException") userMessage = "No account found with that email.";
+                     else if (err.name === "LimitExceededException") userMessage = "Attempt limit exceeded.";
+                     else if (err.code === "NetworkError") userMessage = "Network error.";
+                     else userMessage = err.message || userMessage;
+                     showMessage(resetMessageStep1El, userMessage, "error");
+                 } finally {
+                     toggleButtonLoading(sendCodeButton, false);
+                 }
+             } else {
+                 // --- Handle Step 2: Submit Code and New Password ---
+                 toggleButtonLoading(resetPasswordButton, true);
+                 showMessage(resetMessageStep2El, "Resetting password...");
+                 const email = resetEmailDisplay.textContent;
+                 const code = resetCodeInput.value.trim();
+                 const newPassword = newPasswordInput.value;
+                 if (!code || !newPassword) {
+                     showMessage(resetMessageStep2El, "Code and new password required.", "error");
+                     toggleButtonLoading(resetPasswordButton, false); return;
+                 }
+                 if (!passwordPolicyRegex.test(newPassword)) {
+                     showMessage(resetMessageStep2El, "New password doesn't meet requirements.", "error");
+                     toggleButtonLoading(resetPasswordButton, false); return;
+                 }
+                 try {
+                     await Auth.forgotPasswordSubmit(email, code, newPassword);
+                     showMessage(resetMessageStep2El, "Password successfully reset! Redirecting...", "success");
+                     resetCodeInput.value = "";
+                     newPasswordInput.value = "";
+                     setTimeout(() => {
+                         hide(resetContainer);
+                         show(signinContainer);
+                         showMessage(signinMessageEl, "Password reset. Please sign in.", "success");
+                         showMessage(resetMessageStep2El, "");
+                         emailInput.value = email;
+                         passwordInput.focus();
+                     }, 2500);
+                 } catch (err) {
+                     console.error("Forgot Password Error (Submit Code):", err);
+                     let userMessage = "Password reset failed.";
+                      if (err.name === "CodeMismatchException") userMessage = "Incorrect code.";
+                     else if (err.name === "ExpiredCodeException") userMessage = "Code expired. Please resend.";
+                     else if (err.name === "InvalidPasswordException") userMessage = `Password requirements not met: ${err.message}`;
+                     else if (err.name === "LimitExceededException") userMessage = "Attempt limit exceeded.";
+                     else if (err.code === "NetworkError") userMessage = "Network error.";
+                     else userMessage = err.message || userMessage;
+                     showMessage(resetMessageStep2El, userMessage, "error");
+                     toggleButtonLoading(resetPasswordButton, false);
+                 }
+             }
+         });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demeter Marketplace – About Us</title>
+  <link rel="stylesheet" href="../styles/home_page.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- ---------- NAVBAR ---------- -->
+  <header style="display:flex;align-items:center;justify-content:space-between;">
+    <a href="../index.html" class="logo">
+      <img src="../assets/photos/demeter_logo_png.png" alt="Demeter Logo" class="logo-icon" />
+    </a>
+    <nav style="display:flex;list-style:none;padding:0;margin:0;">
+      <li style="margin-right:15px;"><a href="../index.html">Home</a></li>
+      <li style="margin-right:15px;"><a href="customer.html">Customers</a></li>
+      <li style="margin-right:15px;"><a href="vendor.html">Vendors</a></li>
+      <li style="margin-right:15px;"><a href="composter.html">Composters</a></li>
+      <li style="margin-right:15px;"><a href="register.html">Register</a></li>
+      <li style="margin-right:15px;"><a href="signin.html">Sign&nbsp;In</a></li>
+    </nav>
+  </header>
+
+  <main class="home-page">
+    <section class="hero">
+      <div class="container">
+        <h1>Fighting Food Waste, Feeding Our Community in Baltimore.</h1>
+        <p class="hero-subtext">Did you know that in the US, billions of pounds of food are wasted each year? Demeter is your local solution in Baltimore, Maryland, connecting businesses with surplus and imperfect food to savvy shoppers and composters, creating a win-win for our wallets and our planet.</p>
+      </div>
+    </section>
+
+    <section id="why-it-matters" class="why-it-matters">
+      <div class="container">
+        <!-- ▶️  Embedded autoplay video from S3 (no thumbnail) -->
+        <figure class="video-wrapper" style="margin:0 0 2rem;">
+          <video
+            controls
+            autoplay
+            muted
+            playsinline
+            preload="metadata"
+            width="100%"
+            style="border-radius:0.5rem;box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+            <source src="https://psportfolioproject.s3.us-east-1.amazonaws.com/foodwaste.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </figure>
+
+        <h2>Why Reducing Food Waste Matters - A Local and Global Perspective</h2>
+        <p>We understand the profound impact of food waste. Here in Baltimore, and across the globe, food waste contributes to:</p>
+        <ul>
+          <li><strong>Environmental Concerns:</strong> Food waste in landfills decomposes and releases methane, a potent greenhouse gas contributing to climate change. By rescuing food, we reduce this harmful impact.</li>
+          <li><strong>Economic Inefficiency:</strong> The resources used to grow, process, transport, and sell food are wasted when that food is thrown away. Demeter helps businesses recover some of these costs and offers affordable options to consumers.</li>
+          <li><strong>Social Responsibility:</strong> While food is being wasted, many individuals and families in our community face food insecurity. Demeter aims to bridge this gap by making nutritious food more accessible.</li>
+        </ul>
+        <p>Demeter is committed to making a tangible difference right here in Baltimore. Every action, no matter how small, contributes to a more sustainable and equitable food system.</p>
+      </div>
+    </section>
+
+    <section id="learn-more" class="our-mission">
+      <div class="container">
+        <h2>Our Local Mission: Building a Sustainable Food Ecosystem in Baltimore</h2>
+        <p>Demeter is more than just a marketplace; it's a community-driven initiative focused on creating a resilient and sustainable food ecosystem in Baltimore, Maryland.</p>
+        <p>Our platform is designed to mirror the core principles of these impactful organizations: rescuing perfectly good food before it's wasted and redirecting it to those who can benefit. For businesses, this means a chance to reduce waste disposal costs and potentially gain new customers. For individuals, it's an opportunity to access affordable, quality food. And for composters, it's a reliable source of organic material to enrich our local environment.</p>
+        <p>We believe that by fostering collaboration between local businesses, residents, and composters, Demeter can play a vital role in reducing food waste, strengthening our community, and promoting environmental stewardship in Baltimore.</p>
+      </div>
+    </section>
+
+    <section class="community-impact">
+      <div class="container">
+        <h2>Our Growing Impact in the Baltimore Area</h2>
+        <p>While Demeter is just starting in Baltimore, our vision is to create a significant positive impact. We aim to track and share our progress in terms of:</p>
+        <ul>
+          <li><strong>Pounds of Food Rescued:</strong> Measuring the amount of surplus food saved from ending up in landfills.</li>
+          <li><strong>Meals Provided (or equivalent):</strong> Estimating the number of meals made possible through the food rescued on our platform.</li>
+          <li><strong>Participating Businesses:</strong> Highlighting the local businesses committed to reducing their food waste.</li>
+          <li><strong>Active Community Members:</strong> Celebrating the shoppers and composters who are part of the Demeter movement.</li>
+        </ul>
+        <p>Stay tuned for updates on our impact as our community grows! Together, we can make Baltimore a leader in food waste reduction.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer style="display:flex;align-items:center;justify-content:space-between;">
+    <nav style="display:flex;list-style:none;padding:0;margin:0;">
+      <li style="margin-right:15px;"><a href="about-us.html">About&nbsp;Us</a></li>
+      <li style="margin-right:15px;"><a href="faq.html">FAQ</a></li>
+      <li style="margin-right:15px;"><a href="contact.html">Contact</a></li>
+      <li style="margin-right:15px;"><a href="privacy-policy.html">Privacy&nbsp;Policy</a></li>
+      <li style="margin-right:15px;"><a href="terms-of-service.html">Terms&nbsp;of&nbsp;Service</a></li>
+      <li style="margin-right:15px;"><a href="our-impact.html">Our&nbsp;Impact</a></li>
+      <li style="margin-right:15px;"><a href="success-stories.html">Success&nbsp;Stories</a></li>
+      <li style="margin-right:15px;"><a href="resources.html">Local&nbsp;Food&nbsp;Waste&nbsp;Resources</a></li>
+    </nav>
+    <p style="margin-left:auto;font-size:0.9rem;">&copy; <span id="current-year"></span>&nbsp;Demeter</p>
+  </footer>
+
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1614.0.min.js"></script>
+  <script>
+    // Dynamically update the current year in the footer
+    document.getElementById("current-year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

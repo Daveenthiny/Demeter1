@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Customer Dashboard | Demeter</title>
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<link rel="stylesheet" href="../styles/home_page.css">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.css" rel="stylesheet">
+
+<style>
+/* --- Buttons --- */
+button, .cta-button-secondary {
+  background-color: #3182ce; /* Primary Blue */
+  color: #ffffff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  font-family: inherit; /* Use body font */
+  transition: opacity 0.2s ease;
+  margin-right: 10px; /* Default spacing */
+}
+.cta-button-secondary { background-color: #6c757d; /* Grey */ }
+button:hover, .cta-button-secondary:hover { opacity: 0.9; }
+button:disabled { background-color: #a0aec0; cursor: not-allowed; opacity: 0.7; }
+#signOutButton { padding: 5px 10px; font-size: 0.9em; margin-right: 0; } /* Specific style for sign out */
+
+/* --- Dashboard Specific --- */
+.dashboard-page h1 { color: #000408; margin-bottom: 10px; }
+.dashboard-page p { line-height: 1.6; }
+.dashboard-section { margin-bottom: 30px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1); }
+.dashboard-section h2 { margin-top: 0; color: #00050e; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; }
+
+/* --- Map --- */
+#map-container { min-height: 400px; width: 100%; margin-bottom: 20px; position: relative; } /* Added position relative for potential overlays */
+#map { height: 400px; width: 100%; border-radius: 8px; }
+
+/* --- Search & Table --- */
+#search-container { margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; /* Allow wrapping on small screens */ }
+#search-container label { font-weight: 600; margin-right: 10px; margin-bottom: 5px; /* Spacing for wrap */ }
+#search { padding: 8px 12px; width: 250px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 5px; /* Spacing for wrap */ }
+#searchButton { margin-bottom: 5px; /* Align with input */ }
+
+#table-container, #customer-orders-container .table-wrapper, .order-form table { width: 100%; overflow-x: auto; } /* Enable horizontal scroll on tables */
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { border: 1px solid #ddd; padding: 10px 12px; text-align: left; font-size: .9em; vertical-align: middle; white-space: nowrap; /* Prevent wrapping cell content */ }
+th { background-color: #f2f2f2; cursor: pointer; font-weight: 600; }
+th.sortable::after { content: " \2195"; font-size: .8em; color: #aaa; display: inline-block; } /* Default sort icon */
+th.sortable.asc::after { content: " \2191"; color: green; } /* Ascending sort icon */
+th.sortable.desc::after { content: " \2193"; color: red; } /* Descending sort icon */
+tbody tr:nth-child(even) { background-color: #f9f9f9; } /* Zebra striping */
+tbody tr:hover { background-color: #eef; } /* Hover effect */
+
+/* --- Order Form Specific Styles --- */
+.order-form table { margin-top: 0; } /* Remove top margin for form table */
+.order-form label { font-weight: 600; display: inline-block; margin-bottom: 5px;}
+.order-form input[type="text"],
+.order-form input[type="number"],
+.order-form select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Ensures padding doesn't add to width */
+    margin-bottom: 10px; /* Space below each input */
+}
+.order-form td { padding: 8px; white-space: normal; } /* Allow text wrapping in form cells */
+.order-form button[type="submit"] { margin-top: 10px; }
+#order-status-message { margin-top:15px; padding:10px; border-radius:4px; display:none; font-weight: bold; }
+
+
+/* --- Messages --- */
+.status-message { margin-top: 10px; font-weight: 700; font-size: .9em; padding: 10px; border-radius: 4px; }
+.success-message { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+.error-message { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+#error { padding: 20px; text-align: center; } /* General error display */
+#auth-error-message { margin-bottom: 20px; } /* Spacing for auth error */
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  header, footer { flex-direction: column; }
+  nav ul { margin-top: 10px; }
+  nav li { margin: 0 10px; } /* Adjust spacing */
+  footer nav ul { justify-content: center; }
+  footer p { text-align: center; margin-top: 10px; }
+  #search-container { flex-direction: column; align-items: stretch; }
+  #search { width: calc(100% - 24px); /* Full width minus padding */ margin-right: 0; }
+  #searchButton { width: 100%; margin-top: 10px; }
+  .order-form td { display: block; width: 100%; } /* Stack form cells on mobile */
+  .order-form td:first-child { margin-bottom: 0; } /* Remove bottom margin from label cell */
+  .order-form input, .order-form select { margin-bottom: 15px; } /* Add more space below inputs on mobile */
+}
+</style>
+</head>
+
+<body>
+  <header style="display: flex; align-items: center; justify-content: space-between;">
+    <a href="../index.html" class="logo">
+      <img src="../assets/photos/demeter_logo_png.png" alt="Demeter Logo" class="logo-icon" />
+    </a>
+    <nav style="display: flex; list-style: none; padding: 0; margin: 0;">
+      <li style="margin-right: 15px;"><a href="../index.html">Home</a></li>
+      <li style="margin-left: 10px;"><button id="signOutButton" class="cta-button-secondary">Sign Out</button></li>
+    </nav>
+  </header>
+
+<main class="dashboard-page">
+<div class="container">
+
+  <div id="auth-error-message" class="error-message" style="display:none; text-align: center;"></div>
+
+  <div id="dashboard-content" style="display:none">
+    <h1>Customer Dashboard<br>
+      Welcome, <strong id="welcome-name">Customer</strong></h1>
+
+    <section class="dashboard-section">
+      <h2>Find Food Near You</h2>
+      <div id="map-container"><div id="map"></div></div>
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Available Food Items</h2>
+      <div id="search-container">
+        <label for="search">Search by Category or Name:</label>
+        <input type="search" id="search" placeholder="e.g., Fruits, Apples">
+        <button id="searchButton" class="cta-button-secondary">Search</button>
+      </div>
+
+      <div id="table-container">
+        <table id="foodTable">
+          <thead>
+            <tr>
+              <th class="sortable" onclick="sortTable(0)">Name</th>
+              <th class="sortable" onclick="sortTable(1)">Category</th>
+              <th class="sortable" onclick="sortTable(2)">Expiry</th>
+              <th class="sortable" onclick="sortTable(3)">Location</th>
+              <th class="sortable" onclick="sortTable(4)">Vendor</th>
+              <th class="sortable" onclick="sortTable(5)">Condition</th>
+              <th class="sortable" onclick="sortTable(6)">Quantity</th>
+              <th class="sortable" onclick="sortTable(7)">Price</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+             <tr><td colspan="8" style="text-align:center;">Loading food items...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+        <h2>Place an Order</h2>
+        <p>Please enter all details for your order below.</p>
+        <div class="order-form">
+          <form id="placeOrderForm">
+            <input type="hidden" id="orderVendorId" name="vendorId" value="54c8a468-6001-702b-1914-886a469a37e8">
+            <table>
+              <input type="hidden" id="foodItemId" name="foodItemId">
+              <tr>
+                <td><label for="orderCategory">Category:</label></td>
+                <td>
+                  <select id="orderCategory" name="category" required>
+                    <option value="">--Choose Category--</option>
+                    <option value="Fruits & Vegetables">Fruits & Vegetables</option>
+                    <option value="Grains">Grains</option>
+                    <option value="Bread & Bakery">Bread & Bakery</option>
+                    <option value="Meat, Poultry & Seafood">Meat, Poultry & Seafood</option>
+                    <option value="Dairy & Eggs">Dairy & Eggs</option>
+                    <option value="Canned & Packaged Goods">Canned & Packaged Goods</option>
+                    <option value="Snacks & Sweets">Snacks & Sweets</option>
+                    <option value="Prepared & Ready-to-Eat Foods">Prepared & Ready-to-Eat Foods</option>
+                    <option value="Condiments, Spices & Oils">Condiments, Spices & Oils</option>
+                    <option value="Beverages">Beverages</option>
+                    <option value="Plant-Based / Vegetarian / Vegan">Plant-Based / Vegetarian / Vegan</option>
+                    <option value="others">Others</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td><label for="itemName">Item Name:</label></td>
+                <td><input type="text" id="itemName" name="itemName" required></td>
+              </tr>
+              <tr>
+                <td><label for="itemPrice">Price per item ($):</label></td>
+                <td><input type="number" id="itemPrice" name="itemPrice" step="0.01" min="0" required></td>
+              </tr>
+              <tr>
+                <td><label for="ordervendorName">Vendor:</label></td>
+                <td><input type="text" id="ordervendorName" name="vendorName" required></td>
+              </tr>
+              <tr>
+                <td><label for="deliveryAddress">Address:</label></td>
+                <td><input type="text" id="deliveryAddress" name="address"></td>
+              </tr>
+              <tr>
+                <td><label for="orderQuantity">Quantity:</label></td>
+                <td><input type="number" id="orderQuantity" name="quantity" min="1" required></td>
+              </tr>
+              <tr>
+                <td colspan="2" style="text-align:center">
+                  <button type="submit" id="submitOrderButton">Place Order</button>
+                </td>
+              </tr>
+            </table>
+          </form>
+          <p id="order-status-message"></p> 
+        </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h2>My Orders</h2>
+      <div id="customer-orders-container">
+        <div class="table-wrapper">
+           <p style="text-align:center;">Loading your orders…</p>
+        </div>
+      </div>
+    </section>
+  </div> </div> </main>
+
+<footer style="display: flex; align-items: center; justify-content: space-between;">
+  <nav style="display: flex; list-style: none; padding: 0; margin: 0;">
+      <li style="margin-right: 15px;"><a href="about-us.html">About Us</a></li>
+      <li style="margin-right: 15px;"><a href="faq.html">FAQ</a></li>
+      <li style="margin-right: 15px;"><a href="contact.html">Contact</a></li>
+      <li style="margin-right: 15px;"><a href="privacy-policy.html">Privacy Policy</a></li>
+      <li style="margin-right: 15px;"><a href="terms-of-service.html">Terms of Service</a></li>
+      <li style="margin-right: 15px;"><a href="our-impact.html">Our Impact</a></li>
+      <li style="margin-right: 15px;"><a href="success-stories.html">Success Stories</a></li>
+      <li style="margin-right: 15px;"><a href="resources.html">Local Food Waste Resources</a></li>
+  </nav>
+  <p style="margin-left:auto;font-size:0.9rem;">&copy; <span id="year"></span>&nbsp;Demeter Marketplace. All rights reserved.</p>
+</footer>
+
+<script src="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.js"></script>
+
+<script>
+/* --------------------------------------------------
+   Configuration (API Keys should be secured)
+-------------------------------------------------- */
+// URLs and Keys for AppSync APIs
+const foodApiUrl   = 'https://423dqtssufh3zafje2juqy7d7i.appsync-api.us-east-1.amazonaws.com/graphql';
+const foodApiKey   = 'da2-hqc7j2vsmragnjlprebm4nyxiy'; // WARNING: Secure this key
+const ordersApiUrl = 'https://uoqhw7d2ozclbfqs4jcjafhlzy.appsync-api.us-east-1.amazonaws.com/graphql';
+const ordersApiKey = 'da2-aze7xizn6zbefmoc4qt3svsjtq'; // WARNING: Secure this key
+
+// Map Configuration using Amazon Location Service
+const mapApiKey = "v1.public.eyJqdGkiOiIyMzY2OWZjMC0zODRiLTRmYTItYWZiNi02MjRiYjliNjJlNjMifWtbEJVV0Of4i97XkzJwAOjZxnDZsG4l1RTaXNscBYVF-uoSfiZnUxLTZ6MVTXyrQpiCMNEbE4Mtrlz3xn-Y_hQgZYky7dUxMOcnTDnycdHu_9LRs0vXlbpPda6oG2KAV1w--5eQg2EE8iXvCt5AEgh5Kewf4lChuvcPyo8hrTVOCexgNom23tB09fzBqpI2WyrPqFwuo8viMlUiQGdAqNvfXY98y1VEwHNoyK5orJiXfAkrMLnn_k1uLcB-Kf9vxh0wZIhzUJq-TMoYX58gXlEZRkULjQzHfqTN90UYJMoKBUzIs9Zbji1_dVgxKqvka6KFgk5EDyYSWNmlXF1e-qk.ZWU0ZWIzMTktMWRhNi00Mzg0LTllMzYtNzlmMDU3MjRmYTkx"; // Your provided API Key
+const mapName   = "DemeterFoodMap";             // Your Map Name
+const region    = 'us-east-1';                  // AWS region for Location Service
+
+const CREATE_ORDER_MUTATION = `
+  mutation CreateDemeterOrder($input: CreateDemeterOrderInput!) {
+    createDemeterOrder(input: $input) {
+      id customerId vendorId vendorName orderDate status total
+    }
+  }
+`;
+
+/* --------------------------------------------------
+   Helper Functions
+-------------------------------------------------- */
+/**
+ * Performs a GraphQL query using fetch.
+ * @param {string} url - The GraphQL endpoint URL.
+ * @param {string} key - The API key for authentication.
+ * @param {string} query - The GraphQL query string.
+ * @param {object} [variables={}] - Optional variables for the query.
+ * @returns {Promise<object>} - The data object from the GraphQL response.
+ */
+const gql = async (url, key, query, variables = {}) => {
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key, // Using API Key authentication
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+    // Check for HTTP errors
+    if (!response.ok) {
+        const errorBody = await response.text(); // Read error body for more details
+        throw new Error(`HTTP error! status: ${response.status}, body: ${errorBody}`);
+    }
+    const jsonResponse = await response.json();
+    // Check for GraphQL errors embedded in the response
+    if (jsonResponse.errors) {
+      console.error("GraphQL Errors:", JSON.stringify(jsonResponse.errors, null, 2));
+      // Combine multiple error messages if they exist
+      throw new Error(`GraphQL Error: ${jsonResponse.errors.map(e => e.message).join(', ')}`);
+    }
+    // Ensure data object exists
+    if (!jsonResponse.data) {
+        throw new Error("No data returned from GraphQL query.");
+    }
+    return jsonResponse.data;
+  } catch (error) {
+    // Log the full error and re-throw
+    console.error('Error in gql function:', error);
+    throw error; // Re-throw the original or newly created error
+  }
+};
+
+// **** MODIFIED: Use localStorage consistently ****
+/**
+ * Gets an item from localStorage.
+ * @param {string} key - The key of the item to retrieve.
+ * @returns {string|null} - The value from localStorage or null if not found.
+ */
+const StorageGet = key => localStorage.getItem(key);
+
+/**
+ * Clears all items from localStorage.
+ */
+const StorageClear = () => localStorage.clear();
+
+
+/* --------------------------------------------------
+   Food Items Logic
+-------------------------------------------------- */
+let foodData = []; // Holds the master list of food items
+let sortCol = null; // Tracks the current sort column index
+let sortDir = 'asc'; // Tracks the current sort direction
+
+/**
+ * Loads available food items from the backend and renders them.
+ */
+async function loadFood() {
+  const tableBody = document.getElementById('tableBody');
+  tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Loading available food...</td></tr>';
+  // Query to list food items with quantity greater than 0
+  const query = `query ListAvailableFood {
+      listDemeterFoodItems(filter: { quantity: { gt: 0 } }, limit: 1000) {
+          items { id name category expiryDate location vendorName condition quantity price lat lon }
+      }
+  }`;
+  try {
+    const data = await gql(foodApiUrl, foodApiKey, query);
+    foodData = data.listDemeterFoodItems?.items || []; // Store fetched data
+    if (foodData.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No food items currently available.</td></tr>';
+      initMap([]); // Initialize map even if no items
+    } else {
+      renderTable(foodData); // Render the table with fetched data
+      initMap(foodData); // Initialize map with all available items
+    }
+  } catch (error) {
+    console.error("Failed to load food items:", error);
+    tableBody.innerHTML = `<tr><td colspan="8" class="error-message" style="text-align:center;">Error loading food items: ${error.message}</td></tr>`;
+    initMap([]); // Attempt to initialize the map in an empty state
+  }
+}
+
+/**
+ * Renders the provided array of food items into the table.
+ * @param {Array<object>} itemsArray - The array of food items to render.
+ */
+function renderTable(itemsArray) {
+  const tableBody = document.getElementById('tableBody');
+  if (!itemsArray || itemsArray.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No matching food items found.</td></tr>';
+    return;
+  }
+  // Map items to table rows
+  tableBody.innerHTML = itemsArray.map(item => `
+    <tr>
+      <td>${item.name || 'N/A'}</td>
+      <td>${item.category || 'N/A'}</td>
+      <td>${item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : 'N/A'}</td>
+      <td>${item.location || 'N/A'}</td>
+      <td>${item.vendorName || 'N/A'}</td>
+      <td>${item.condition || 'N/A'}</td>
+      <td>${item.quantity ?? 'N/A'}</td>
+      <td>$${typeof item.price === 'number' ? item.price.toFixed(2) : 'N/A'}</td>
+    </tr>`).join('');
+  updateSortUI(); // Update visual indicators for sorting
+}
+
+/**
+ * Sorts the food data based on the selected column index and re-renders the table.
+ * @param {number} columnIndex - The index of the column to sort by.
+ */
+function sortTable(columnIndex) {
+  const keys = ['name', 'category', 'expiryDate', 'location', 'vendorName', 'condition', 'quantity', 'price'];
+  const key = keys[columnIndex];
+  if (!key) return; // Invalid column index
+
+  // Determine sort direction (toggle if same column, default to asc)
+  const isAscending = columnIndex === sortCol ? sortDir === 'desc' : true;
+  sortCol = columnIndex;
+  sortDir = isAscending ? 'asc' : 'desc';
+
+  // Create a sorted copy of the data
+  const sortedData = [...foodData].sort((a, b) => {
+    let valueA = a[key];
+    let valueB = b[key];
+
+    // Handle different data types for sorting
+    switch (key) {
+      case 'expiryDate': // Sort by date timestamp
+        valueA = valueA ? new Date(valueA).getTime() : 0;
+        valueB = valueB ? new Date(valueB).getTime() : 0;
+        return isAscending ? valueA - valueB : valueB - valueA;
+      case 'quantity': // Sort numerically
+      case 'price':
+        valueA = Number(valueA) || 0;
+        valueB = Number(valueB) || 0;
+        return isAscending ? valueA - valueB : valueB - valueA;
+      default: // Sort alphabetically (case-insensitive)
+        valueA = String(valueA || '').toLowerCase();
+        valueB = String(valueB || '').toLowerCase();
+        return isAscending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+    }
+  });
+  renderTable(sortedData); // Re-render the table with sorted data
+}
+
+/**
+ * Updates the visual indicators (arrows) on table headers for sorting.
+ */
+function updateSortUI() {
+  document.querySelectorAll('#foodTable th.sortable').forEach((th, index) => {
+    th.classList.remove('asc', 'desc'); // Remove existing sort classes
+    if (index === sortCol) {
+      th.classList.add(sortDir); // Add the current sort direction class
+    }
+  });
+}
+
+/**
+ * Filters the food items based on the search input and re-renders the table and map.
+ */
+function filterFoodItems() {
+    const searchTerm = document.getElementById('search').value.trim().toUpperCase();
+    // If search term is empty, show all items
+    if (!searchTerm) {
+        renderTable(foodData); // Render full table
+        addMarkersToMap(foodData); // Show all markers
+        return;
+    }
+    // Filter items where category or name includes the search term (case-insensitive)
+    const filteredItems = foodData.filter(item =>
+        (item.category || '').toUpperCase().includes(searchTerm) ||
+        (item.name || '').toUpperCase().includes(searchTerm)
+    );
+    renderTable(filteredItems); // Render filtered table
+    addMarkersToMap(filteredItems); // Show markers for filtered items
+}
+
+// Attach event listeners for search
+document.getElementById('searchButton').addEventListener('click', filterFoodItems);
+document.getElementById('search').addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') { // Allow searching by pressing Enter
+        filterFoodItems();
+    }
+});
+
+
+/* --------------------------------------------------
+   Map Logic (MapLibre GL JS) - Updated Functions
+-------------------------------------------------- */
+let map; // Holds the map instance globally
+let currentMarkers = []; // Keep track of markers to remove them later
+
+/**
+ * Initializes the MapLibre map.
+ * @param {Array<object>} initialFoodData - Food items to display initially.
+ */
+function initMap(initialFoodData) {
+    // Prevent re-initialization if map already exists
+    if (map) {
+        addMarkersToMap(initialFoodData); // Just update markers if map exists
+        return;
+    }
+    try {
+        map = new maplibregl.Map({
+            container: "map", // ID of the map container div
+            // Use Amazon Location Service style descriptor
+            style: `https://maps.geo.${region}.amazonaws.com/maps/v0/maps/${mapName}/style-descriptor?key=${mapApiKey}`,
+            center: [-76.70156, 39.26514], // Default center (adjust as needed)
+            zoom: 15, // Default zoom level
+        });
+        // Add navigation controls (zoom, rotation)
+        map.addControl(new maplibregl.NavigationControl(), "top-left");
+
+        // Add markers once the map style has loaded
+        map.on('load', () => addMarkersToMap(initialFoodData));
+
+    } catch (error) {
+        console.error("Map initialization failed:", error);
+        document.getElementById('map-container').innerHTML = `<p class="error-message">Could not load map: ${error.message}</p>`;
+    }
+}
+
+/**
+ * Clears existing markers and adds new markers to the map for the given food items.
+ * @param {Array<object>} foodItems - Array of food items with lat/lon properties.
+ */
+function addMarkersToMap(foodItems) {
+    if (!map) return; // Exit if map is not initialized
+
+    // Remove existing markers
+    currentMarkers.forEach(marker => marker.remove());
+    currentMarkers = []; // Clear the marker array
+
+    const bounds = new maplibregl.LngLatBounds(); // To fit map to markers
+
+    foodItems.forEach(item => {
+        const lat = parseFloat(item.lat);
+        const lon = parseFloat(item.lon);
+
+        // Check if latitude and longitude are valid numbers
+        if (!isNaN(lat) && !isNaN(lon)) {
+            // Create popup content
+            const popupContent = `
+                <strong>${item.name || 'Item'}</strong><br>
+                Category: ${item.category || 'N/A'}<br>
+                Vendor: ${item.vendorName || 'N/A'}<br>
+                Location: ${item.location || 'N/A'}<br>
+                Quantity: ${item.quantity ?? 'N/A'}<br>
+                Price: $${typeof item.price === 'number' ? item.price.toFixed(2) : 'N/A'}
+            `;
+            const popup = new maplibregl.Popup({ offset: 25 }).setHTML(popupContent);
+
+            // Create marker and add to map
+            const marker = new maplibregl.Marker({ color: '#3182ce' }) // Blue marker
+                .setLngLat([lon, lat])
+                .setPopup(popup) // Add popup to marker
+                .addTo(map);
+
+            currentMarkers.push(marker); // Track the new marker
+            bounds.extend([lon, lat]); // Extend bounds to include this marker
+        } else {
+            console.warn("Invalid coordinates for item:", item.name, item.lat, item.lon);
+        }
+    });
+
+    // Fit map to bounds if any valid markers were added
+    if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, { padding: 50, maxZoom: 15 }); // Add padding and max zoom
+    } else if (foodItems.length > 0) {
+         // If items exist but none have coords, maybe reset view or show message
+         console.log("No valid coordinates found for the filtered items.");
+         // Optionally reset map view: map.flyTo({ center: [-76.7, 39.2], zoom: 10 });
+    }
+}
+/* --------------------------------------------------
+   Order Placement Logic
+-------------------------------------------------- */
+async function submitOrder(event) {
+  event.preventDefault();
+
+  const form = event.target;
+  const orderStatusMsg = document.getElementById('order-status-message');
+  const submitButton = document.getElementById('submitOrderButton');
+
+  const customerId = StorageGet('currentUserId');
+  if (!customerId) {
+    orderStatusMsg.textContent = 'Error: You must be signed in to place an order.';
+    orderStatusMsg.className = 'error-message';
+    orderStatusMsg.style.display = 'block';
+    return;
+  }
+
+  // MODIFIED: Get all fields directly from the form as they are now manually entered
+  const category = document.getElementById('orderCategory').value;
+  const itemName = document.getElementById('itemName').value;
+  const itemPrice = parseFloat(document.getElementById('itemPrice').value);
+  const vendorId   = document.getElementById('orderVendorId').value;
+  const vendorName = document.getElementById('ordervendorName').value.trim();
+  const quantity = parseInt(document.getElementById('orderQuantity').value, 10);
+  // const deliveryAddress = document.getElementById('deliveryAddress').value; // Still optional
+
+  // Basic validation
+  if (!category || !itemName || !vendorName) {
+    orderStatusMsg.textContent = 'Please fill in Category, Item Name, and Vendor Name.';
+    orderStatusMsg.className = 'error-message';
+    orderStatusMsg.style.display = 'block';
+    return;
+  }
+  if (isNaN(itemPrice) || itemPrice < 0) {
+    orderStatusMsg.textContent = 'Please enter a valid item price.';
+    orderStatusMsg.className = 'error-message';
+    orderStatusMsg.style.display = 'block';
+    return;
+  }
+  if (isNaN(quantity) || quantity < 1) {
+    orderStatusMsg.textContent = 'Please enter a valid quantity (at least 1).';
+    orderStatusMsg.className = 'error-message';
+    orderStatusMsg.style.display = 'block';
+    return;
+  }
+
+  const orderInput = {
+    customerId: customerId,
+    vendorId:   vendorId,
+    vendorName: vendorName, 
+    orderDate: new Date().toISOString(),
+    status: 'Placed',
+    total: parseFloat((itemPrice * quantity).toFixed(2)),
+  };
+
+  console.log("Submitting order with input:", orderInput);
+  orderStatusMsg.textContent = 'Placing your order...';
+  orderStatusMsg.className = 'status-message';
+  orderStatusMsg.style.display = 'block';
+  if (submitButton) submitButton.disabled = true;
+
+  try {
+    const result = await gql(ordersApiUrl, ordersApiKey, CREATE_ORDER_MUTATION, { input: orderInput });
+    if (result && result.createDemeterOrder && result.createDemeterOrder.id) {
+      console.log('Order placed successfully:', result.createDemeterOrder);
+      orderStatusMsg.textContent = `Order placed successfully! Order ID: ${result.createDemeterOrder.id}`;
+      orderStatusMsg.className = 'success-message';
+      form.reset();
+      // Clear hidden fields if they were used, though not primary for this flow anymore
+      document.getElementById('foodItemId').value = '';
+      // document.getElementById('selectedVendorId').value = ''; // This hidden field is no longer used to get vendorId
+      loadOrders(customerId);
+    } else {
+      console.error('Error placing order, unexpected response structure:', result);
+      orderStatusMsg.textContent = 'Failed to place order. Unexpected response from server.';
+      orderStatusMsg.className = 'error-message';
+    }
+  } catch (error) {
+    console.error('Error submitting order:', error);
+    orderStatusMsg.textContent = `Failed to place order: ${error.message}. Please try again.`;
+    orderStatusMsg.className = 'error-message';
+  } finally {
+    if (submitButton) submitButton.disabled = false;
+  }
+}
+const placeOrderFormElement = document.getElementById('placeOrderForm');
+if (placeOrderFormElement) {
+    placeOrderFormElement.addEventListener('submit', submitOrder);
+} else {
+    console.error("Place order form not found!");
+}
+
+
+/* --------------------------------------------------
+   Orders Logic
+-------------------------------------------------- */
+/**
+ * Loads and displays the current customer's orders.
+ * @param {string} customerId - The ID of the currently logged-in customer.
+ */
+ async function loadOrders(customerId) {
+  const ordersContainer = document.querySelector('#customer-orders-container .table-wrapper');
+  ordersContainer.innerHTML = '<p style="text-align:center;">Loading your orders…</p>';
+
+  // GraphQL query to list orders, potentially filtered by customerId on the backend if possible,
+  // otherwise filter client-side. Assuming client-side filtering here.
+  // Note: Filtering by customerId directly might require a secondary index in DynamoDB.
+  const query = `query ListCustomerOrders($lim: Int) {
+    listDemeterOrders(limit: $lim) {
+      items {
+        id
+        customerId # Must include customerId for filtering
+        vendorName
+        vendorId
+        orderDate
+        total
+        status
+        # Include other relevant order fields if needed
+      }
+    }
+  }`;
+  const variables = { lim: 1000 }; // Fetch a reasonable limit of recent orders
+
+  try {
+    const data = await gql(ordersApiUrl, ordersApiKey, query, variables);
+
+    // Access the 'items' array and filter client-side
+    const allOrders = data.listDemeterOrders?.items || [];
+    const customerOrders = allOrders.filter(order => order && order.customerId === customerId);
+
+    if (!customerOrders.length) {
+      ordersContainer.innerHTML = '<p style="text-align:center;">No past orders found.</p>';
+      return;
+    }
+
+    // Render the filtered orders into a table
+    ordersContainer.innerHTML = `
+      <table style="width:100%">
+        <thead><tr><th>Vendor</th><th>Date</th><th>Total</th><th>Status</th><th>Order ID</th></tr></thead>
+        <tbody>
+          ${customerOrders.map(order => `
+            <tr>
+              <td>${order.vendorName || 'N/A'}</td>
+              <td>${order.orderDate ? new Date(order.orderDate).toLocaleString() : 'N/A'}</td>
+              <td>$${typeof order.total === 'number' ? order.total.toFixed(2) : 'N/A'}</td>
+              <td>${order.status || 'N/A'}</td>
+              <td>${order.id || 'N/A'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  } catch (error) {
+    console.error("Error loading orders:", error);
+    // Display the specific error message
+    ordersContainer.innerHTML = `<p class="error-message" style="text-align:center;">Could not load your orders: ${error.message}</p>`;
+  }
+}
+
+
+/* --------------------------------------------------
+   Authentication & Page Initialization
+-------------------------------------------------- */
+/**
+ * Initializes the page on DOMContentLoaded event.
+ * Checks authentication status using localStorage and loads relevant data.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+  // Set the current year in the footer
+  const yearSpan = document.getElementById('year');
+  if(yearSpan) yearSpan.textContent = new Date().getFullYear();
+
+  // **** MODIFIED: Use localStorage consistently ****
+  const currentUserId = StorageGet('currentUserId');
+  const currentUserName = StorageGet('currentUserName');
+  const currentUserRole = StorageGet('currentUserRole');
+
+  const dashboardContent = document.getElementById('dashboard-content');
+  const authErrorMessage = document.getElementById('auth-error-message');
+
+  // Check if user is logged in and has the 'Customer' role
+  if (currentUserId && currentUserRole === 'Customer') {
+    // Show dashboard, hide error message
+    dashboardContent.style.display = 'block';
+    authErrorMessage.style.display = 'none';
+    // Display welcome message
+    const welcomeNameEl = document.getElementById('welcome-name');
+    if(welcomeNameEl) welcomeNameEl.textContent = currentUserName || 'Customer'; // Use stored name or default
+
+    // Load dynamic content
+    loadFood(); // Loads food items and initializes the map
+    loadOrders(currentUserId); // Loads the customer's specific orders
+
+  } else {
+    // User is not logged in or not a customer
+    // Hide dashboard, show error message
+    dashboardContent.style.display = 'none';
+    authErrorMessage.textContent = 'Access Denied. Please sign in as a Customer.';
+    authErrorMessage.style.display = 'block';
+    console.warn("Access denied: User not logged in or not a Customer.");
+    // Optionally redirect to sign-in page after a delay
+    // setTimeout(() => { window.location.href = 'signin.html'; }, 3000);
+  }
+
+  // Set up Sign Out button functionality
+  const signOutButton = document.getElementById('signOutButton');
+  if (signOutButton) {
+      signOutButton.addEventListener('click', () => {
+          // **** MODIFIED: Clear localStorage consistently ****
+          StorageClear(); // Clear the correct storage
+          // Redirect to sign-in page
+          window.location.href = 'signin.html';
+      });
+  } else {
+      console.error("Sign out button not found.");
+  }
+});
+
+</script>
+</body>
+</html>

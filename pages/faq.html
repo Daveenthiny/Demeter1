@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demeter | FAQ</title>
+  <link rel="stylesheet" href="../styles/home_page.css" />
+  <style>
+    .faq-container {
+      max-width: 800px;
+      margin: 4rem auto;
+      padding: 2rem;
+      background-color: #fdf7ed;
+      border-left: 5px solid goldenrod;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .faq-container h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .faq-container p {
+      margin-bottom: 1rem;
+    }
+
+    .faq-container strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: var(--green-dark);
+    }
+  </style>
+  </head>
+    <body>
+        <header style="display: flex; align-items: center; justify-content: space-between;">
+            <a href="../index.html" class="logo-text">Demeter</a>
+
+            <nav style="display: flex; list-style: none; padding: 0; margin: 0;">
+            <li style="margin-right: 15px;"><a href="../index.html">Home</a></li>
+            <li style="margin-right: 15px;"><a href="customer.html">Customers</a></li>
+            <li style="margin-right: 15px;"><a href="vendor.html">Vendors</a></li>
+            <li style="margin-right: 15px;"><a href="composter.html">Composters</a></li>
+            <li style="margin-right: 15px;"><a href="register.html">Register</a></li>
+            <li style="margin-right: 15px;"><a href="signin.html">Sign In</a></li>
+            </nav>
+        </header>
+    
+        <main>
+            <section class="faq-section">
+                <div class="content-box with-bar">
+                  <h1>Frequently Asked Questions</h1>
+              
+                  <h2>What is Demeter?</h2>
+                  <p>Demeter is an online marketplace that connects individuals, vendors, and composters to reduce food waste by redistributing expiring or imperfect food items.</p>
+              
+                  <h2>How do I register?</h2>
+                  <p>Click “Register” at the top right of any page. Choose whether you're signing up as a Customer, Vendor, or Composter, then follow the prompts.</p>
+              
+                  <h2>What types of food can I find on Demeter?</h2>
+                  <p>You can find produce and packaged items close to expiry, with minor imperfections, or discounted surplus inventory from local vendors.</p>
+              
+                  <h2>How do composters use Demeter?</h2>
+                  <p>Composters can register to browse unsold food from vendors nearby and request pickups for composting purposes.</p>
+              
+                  <h2>Is my payment secure?</h2>
+                  <p>Yes. All payments are processed through trusted providers and protected via secure authentication through Amazon Cognito.</p>
+                </div>
+              </section>
+        </main>
+    
+        <footer class="site-footer">
+            <nav class="footer-nav">
+              <ul>
+                <li><a href="aboutus.html">About Us</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                <li><a href="terms-of-service.html">Terms of Service</a></li>
+                <li><a href="our-impact.html">Our Impact</a></li>
+                <li><a href="success-stories.html">Success Stories</a></li>
+                <li><a href="resources.html">Local Food Waste Resources</a></li>
+              </ul>
+            </nav>
+            <p style="margin-left:auto;font-size:0.9rem;">&copy; <span id="current-year"></span>&nbsp;Demeter Marketplace. All rights reserved.</p>
+        </footer>
+        <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1614.0.min.js"></script>
+    <script>
+        // Dynamically update the current year in the footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Update distance dynamically
+        document.getElementById('composter-filter-distance').addEventListener('input', function () {
+            document.getElementById('composter-distance-value').textContent = `${this.value} miles`;
+        });
+
+        // Handle profile form submission (This logic can remain here or be moved to main.js)
+        document.getElementById('composter-profile-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const status = document.getElementById('profile-save-status');
+            status.textContent = 'Profile updated successfully!';
+            status.style.display = 'block';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        });
+    </script>
+    </body>

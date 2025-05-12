@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demeter Marketplace – Registration</title>
+    <link rel="stylesheet" href="../styles/home_page.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        /* Basic styles for form elements */
+        input[type="email"],
+        input[type="password"],
+        input[type="text"],
+        select { /* Added select for consistency if needed later */
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0; /* Tailwind gray-300 */
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 1rem; /* Spacing below inputs */
+        }
+
+        /* Styles for the submit button */
+        button[type="submit"], button#verifyBtn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem; /* Tailwind rounded-lg */
+            background-color: #3182ce; /* Tailwind blue-600 */
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex; /* For aligning spinner */
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem; /* Space between text and spinner */
+        }
+
+        /* Hover state for buttons */
+        button[type="submit"]:hover:not(:disabled),
+        button#verifyBtn:hover:not(:disabled) {
+            background-color: #2b6cb0; /* Tailwind blue-700 */
+        }
+
+        /* Disabled state for buttons */
+        button[type="submit"]:disabled,
+        button#verifyBtn:disabled {
+            background-color: #a0aec0; /* Tailwind gray-400 */
+            cursor: not-allowed;
+        }
+
+        /* Styles for error and message text */
+        .message-text {
+            font-size: 0.875rem; /* Tailwind text-sm */
+            margin-top: 1rem;
+            min-height: 1.25em; /* Ensure space even when empty */
+            text-align: center;
+        }
+        .message-text.error { color: #e53e3e; /* Tailwind red-600 */ }
+        .message-text.success { color: #38a169; /* Tailwind green-600 */ }
+
+        /* Styles for links */
+        .link-text {
+            font-size: 0.875rem; /* Tailwind text-sm */
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .link-text a {
+            color: #3182ce; /* Tailwind blue-600 */
+            text-decoration: none;
+        }
+        .link-text a:hover { text-decoration: underline; }
+
+        /* Utility class to hide elements */
+        .hidden { display: none; }
+
+        /* Footer paragraph styling */
+        footer p {
+            text-align: right;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Simple CSS spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            width: 1em;
+            height: 1em;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Radio button layout */
+        .radio-group label {
+            margin-right: 1rem;
+            display: inline-block; /* Keep radios inline */
+        }
+        .form-group {
+            margin-bottom: 1rem; /* Consistent spacing */
+        }
+        label {
+            display: block; /* Ensure labels are above inputs */
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+
+    </style>
+</head>
+<body>
+    <header style="display:flex;align-items:center;justify-content:space-between;">
+        <a href="../index.html" class="logo">
+            <img src="../assets/photos/demeter_logo_png.png" alt="Demeter Logo" class="logo-icon" />
+        </a>
+        <nav style="display:flex;list-style:none;padding:0;margin:0;">
+            <li style="margin-right:15px;"><a href="../index.html">Home</a></li>
+            <li style="margin-right:15px;"><a href="signin.html">Sign&nbsp;In</a></li>
+        </nav>
+    </header>
+
+    <main class="container" style="max-width: 500px; margin: 2rem auto; padding: 2rem; background-color: #fff; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h1>User Registration</h1>
+
+        <form id="registrationForm" autocomplete="off">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required autocomplete="email" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                    type="password" id="password" name="password" minlength="8"
+                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\^$*.[\]{}()?\-!@#%&/,><':;|_~`+=]).{8,}"
+                    title="Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character (e.g., !@#$%^&*)."
+                    required autocomplete="new-password" />
+                <small style="font-size: 0.75rem; color: #555;">Requires 8+ chars, uppercase, lowercase, number, symbol.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="password2">Confirm Password</label>
+                <input
+                    type="password" id="password2" name="password2" minlength="8"
+                    required autocomplete="new-password" />
+            </div>
+
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" required autocomplete="name" />
+            </div>
+
+            <div class="form-group">
+                <label for="locationText">Address</label>
+                <input type="text" id="locationText" name="locationText" required autocomplete="street-address"/>
+            </div>
+
+            <div class="form-group radio-group">
+                <label>User Role</label>
+                <label><input type="radio" name="role" value="Customer" checked /> Customer</label>
+                <label><input type="radio" name="role" value="Vendor" /> Vendor</label>
+                <label><input type="radio" name="role" value="Composter" /> Composter</label>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <span class="button-text">Register</span>
+                <span class="spinner hidden"></span>
+            </button>
+        </form>
+
+        <section id="verifySection" class="hidden">
+            <h2>Email verification</h2>
+            <p style="margin-bottom: 1rem;">We've sent a 6‑digit code to <strong id="verifyEmail"></strong>. Enter it below to activate your account.</p>
+            <div class="form-group">
+                <label for="verifyCode">Verification code</label>
+                <input type="text" id="verifyCode" pattern="\d{6}" maxlength="6" required autocomplete="one-time-code" />
+            </div>
+            <button id="verifyBtn">
+                 <span class="button-text">Confirm</span>
+                 <span class="spinner hidden"></span>
+            </button>
+            <p class="link-text"><a href="#" id="resendCode">Resend code</a></p>
+        </section>
+
+        <p id="message" class="message-text"></p>
+
+         <p class="link-text" style="margin-top: 1.5rem;">Already have an account? <a href="signin.html">Sign in here</a></p>
+    </main>
+
+    <footer style="display:flex;align-items:center;justify-content:space-between; padding: 1rem 2rem; border-top: 1px solid #eee;">
+        <nav style="display:flex;list-style:none;padding:0;margin:0;">
+            <li style="margin-right:15px;"><a href="about-us.html">About&nbsp;Us</a></li>
+            <li style="margin-right:15px;"><a href="faq.html">FAQ</a></li>
+            <li style="margin-right:15px;"><a href="contact.html">Contact</a></li>
+            <li style="margin-right:15px;"><a href="privacy-policy.html">Privacy&nbsp;Policy</a></li>
+            <li style="margin-right:15px;"><a href="terms-of-service.html">Terms&nbsp;of&nbsp;Service</a></li>
+            <li style="margin-right:15px;"><a href="our-impact.html">Our&nbsp;Impact</a></li>
+            <li style="margin-right:15px;"><a href="success-stories.html">Success&nbsp;Stories</a></li>
+            <li style="margin-right:15px;"><a href="resources.html">Local&nbsp;Food&nbsp;Waste&nbsp;Resources</a></li>
+        </nav>
+        <p style="margin-left:auto;font-size:0.9rem;">
+            &copy; <span id="current-year"></span>&nbsp;Demeter
+        </p>
+    </footer>
+
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/aws-amplify@4/dist/aws-amplify.min.js"></script>
+
+    <script>
+        // Set current year in footer
+        document.getElementById("current-year").textContent = new Date().getFullYear();
+
+        // -------- AppSync Configuration --------
+        const APPSYNC_ENDPOINT = "https://egmaenphbvcv5jvqmxf6c3f6hy.appsync-api.us-east-1.amazonaws.com/graphql";
+        const APPSYNC_API_KEY  = "da2-6raxosxi4zgvdaxgn26qyujstu"; // WARNING: Consider secure auth method
+
+        // GraphQL mutation to create a user profile in DynamoDB via AppSync
+        // Matches the CreateUserInput schema
+        const CREATE_USER_MUTATION = /* GraphQL */ `
+          mutation CreateUser($input: CreateUserInput!) {
+            createUser(input: $input) {
+              id # The resolver generates and returns this ID
+              email
+              role
+              name
+              location
+              createdAt
+            }
+          }
+        `;
+
+        // ---------- Amplify / Cognito configuration ----------
+        const { Amplify, Auth } = window.aws_amplify;
+        Amplify.configure({
+            Auth: {
+                region: "us-east-1",
+                userPoolId: "us-east-1_NFUnvsdaI",
+                userPoolWebClientId: "sb37s7cf6ld9roa6drove90fl",
+                usernameAttributes: ["email"],
+                authenticationFlowType: "USER_PASSWORD_AUTH",
+                storage: window.localStorage, // Use localStorage consistently
+            },
+            Logger: { LOG_LEVEL: "INFO" }, // Use DEBUG for more verbose Amplify logs
+        });
+
+        // -------- DOM Element References --------
+        const registrationForm = document.getElementById("registrationForm");
+        const verifySection = document.getElementById("verifySection");
+        const submitBtn = document.getElementById("submitBtn");
+        const verifyBtn = document.getElementById("verifyBtn");
+        const messageEl = document.getElementById("message");
+        const verifyEmailEl = document.getElementById("verifyEmail");
+        const resendCodeLink = document.getElementById("resendCode");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const password2Input = document.getElementById("password2");
+        const nameInput = document.getElementById("name");
+        const locationInput = document.getElementById("locationText"); // Input field ID for address
+        const roleInputs = document.querySelectorAll('input[name="role"]');
+
+        // -------- Helper Functions --------
+        const $ = (id) => document.getElementById(id);
+        const show = (el) => el?.classList.remove("hidden");
+        const hide = (el) => el?.classList.add("hidden");
+
+        /**
+         * Displays a message to the user and logs it to the console.
+         * @param {string} text - The message text.
+         * @param {string} [type="info"] - The message type ('info', 'success', 'error').
+         */
+        function showMessage(text, type = "info") {
+            console.log(`[UI Message - ${type}]: ${text}`); // Log all UI messages
+            messageEl.textContent = text;
+            messageEl.className = 'message-text'; // Reset class
+            if (type === 'error') messageEl.classList.add('error');
+            else if (type === 'success') messageEl.classList.add('success');
+        }
+
+        /**
+         * Toggles the loading state of a button (disables, shows/hides spinner).
+         * @param {HTMLButtonElement} button - The button element.
+         * @param {boolean} isLoading - Whether the button should be in loading state.
+         */
+        function toggleButtonLoading(button, isLoading) {
+            const textSpan = button.querySelector('.button-text');
+            const spinnerSpan = button.querySelector('.spinner');
+            button.disabled = isLoading;
+            if (isLoading) {
+                if(textSpan) textSpan.style.display = 'none';
+                if(spinnerSpan) show(spinnerSpan);
+            } else {
+                if(textSpan) textSpan.style.display = 'inline';
+                if(spinnerSpan) hide(spinnerSpan);
+            }
+        }
+
+        /**
+         * Executes a GraphQL query/mutation via fetch with enhanced logging.
+         * @param {string} query - The GraphQL query or mutation string.
+         * @param {object} variables - The variables for the operation.
+         * @returns {Promise<object>} - The data part of the GraphQL response.
+         */
+        async function callGraphQL(query, variables) {
+            console.log("Attempting GraphQL call...");
+            console.log("Endpoint:", APPSYNC_ENDPOINT);
+            // Log only the first part of the query for brevity if needed
+            console.log("Query:", query.substring(0, 100) + '...');
+            console.log("Variables:", JSON.stringify(variables, null, 2)); // Log variables clearly
+
+            try {
+                const response = await fetch(APPSYNC_ENDPOINT, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-api-key": APPSYNC_API_KEY // Using API Key auth
+                    },
+                    body: JSON.stringify({ query, variables }),
+                });
+
+                // Log raw response status
+                console.log(`GraphQL Response Status: ${response.status} ${response.statusText}`);
+
+                const result = await response.json();
+                console.log("GraphQL Raw Response Body:", JSON.stringify(result, null, 2)); // Log the full response
+
+                // Check for HTTP-level errors
+                if (!response.ok) {
+                     const errorMessage = result?.errors?.[0]?.message || `Network error: ${response.statusText}`;
+                     console.error(`GraphQL HTTP Error: ${errorMessage}`);
+                     throw new Error(errorMessage);
+                }
+                // Check for GraphQL-level errors in the response body
+                if (result.errors) {
+                    const errorMessage = result.errors[0].message || "Unknown GraphQL error";
+                    console.error(`GraphQL Error in Response: ${errorMessage}`, result.errors);
+                    throw new Error(errorMessage);
+                }
+                // Check if the expected 'data' field is present
+                if (!('data' in result)) {
+                    console.warn("GraphQL response missing 'data' field:", result);
+                    throw new Error("Invalid response structure from API.");
+                }
+                console.log("GraphQL Call Successful, Data:", result.data);
+                return result.data;
+            } catch (error) {
+                 // Log error caught during fetch or processing
+                 console.error("Error during callGraphQL execution:", error);
+                 // Re-throw a consistent error object
+                 throw new Error(error.message || "API call failed unexpectedly.");
+            }
+        }
+
+        // Regex for password policy validation
+        const passwordPolicyRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\^$*.[\]{}()?\-!@#%&/,><':;|_~`+=]).{8,}$/;
+        // localStorage keys
+        const PENDING_REGISTRATION_DATA_KEY = 'demeterPendingRegData';
+        const PENDING_VERIFICATION_EMAIL_KEY = 'demeterPendingVerifyEmail';
+
+        // -------- Event Listeners --------
+
+        /**
+         * Handles the submission of the main registration form.
+         * Performs validation, saves pending data, and calls Cognito Auth.signUp.
+         */
+        registrationForm.addEventListener("submit", async (e) => {
+            e.preventDefault(); // Prevent default HTML form submission
+            toggleButtonLoading(submitBtn, true);
+            showMessage("Registering..."); // Provide initial feedback
+
+            // Get and trim form values
+            const email = emailInput.value.trim().toLowerCase();
+            const password = passwordInput.value;
+            const password2 = password2Input.value;
+            const name = nameInput.value.trim();
+            const locationValue = locationInput.value.trim(); // This is the address
+            const role = document.querySelector('input[name="role"]:checked').value;
+
+            // --- Client-side Validation ---
+            let validationError = null;
+            if (password !== password2) validationError = "Passwords do not match.";
+            else if (!passwordPolicyRegex.test(password)) validationError = "Password does not meet requirements (8+ chars, upper, lower, number, symbol).";
+            else if (!name) validationError = "Please enter your full name.";
+            else if (!locationValue) validationError = "Please enter your address."; // Address is required
+
+            if (validationError) {
+                showMessage(validationError, "error");
+                toggleButtonLoading(submitBtn, false);
+                return; // Stop processing if validation fails
+            }
+
+            // --- Prepare Data for createUser mutation (matches AppSync schema) ---
+            const profileDataForMutation = {
+                email: email,
+                name: name,
+                role: role,
+                location: locationValue, // Field name is 'location' in schema/mutation
+            };
+            console.log("Prepared data for mutation (pre-storage):", profileDataForMutation);
+
+            // --- Store data needed *after* verification temporarily ---
+            try {
+                localStorage.setItem(PENDING_REGISTRATION_DATA_KEY, JSON.stringify(profileDataForMutation));
+                localStorage.setItem(PENDING_VERIFICATION_EMAIL_KEY, email);
+                console.log("Pending registration data saved to localStorage.");
+            } catch (storageError) {
+                console.error("Failed to save pending data to localStorage:", storageError);
+                showMessage("A local storage error occurred. Please try again.", "error");
+                toggleButtonLoading(submitBtn, false);
+                return;
+            }
+
+            // --- Call Cognito signUp ---
+            try {
+                // Prepare attributes for Cognito (uses 'address' standard attribute)
+                const cognitoAttributes = {
+                    name: name,
+                    address: locationValue, // Use 'address' for Cognito standard attribute
+                    'custom:role': role,    // Custom attribute for role
+                };
+                console.log("Calling Auth.signUp with attributes:", cognitoAttributes);
+
+                await Auth.signUp({
+                    username: email, // Cognito uses 'username' for the sign-in identifier (email in this case)
+                    password: password,
+                    attributes: cognitoAttributes,
+                });
+                console.log("Auth.signUp successful for:", email);
+
+                // --- Success - Move to Verification Step ---
+                verifyEmailEl.textContent = email; // Show email in verification section
+                hide(registrationForm); // Hide the main form
+                show(verifySection); // Show the verification code input section
+                showMessage("Almost done! Enter the code we emailed you.", "info");
+                $('verifyCode').focus(); // Focus the code input field
+
+            } catch (err) {
+                // Handle errors during Cognito sign-up
+                console.error("Registration Error during Auth.signUp:", err); // Log the full error object
+                // Clear potentially incomplete pending data from localStorage
+                localStorage.removeItem(PENDING_REGISTRATION_DATA_KEY);
+                localStorage.removeItem(PENDING_VERIFICATION_EMAIL_KEY);
+                console.log("Cleared pending registration data due to signUp error.");
+
+                // Map common Cognito errors to user-friendly messages
+                let userMessage = "Registration failed. Please try again.";
+                if (err.name === "UsernameExistsException") userMessage = "An account with this email already exists.";
+                else if (err.name === "InvalidPasswordException") userMessage = `Password does not meet requirements: ${err.message}`;
+                else if (err.name === "InvalidParameterException" && err.message.includes("attribute")) {
+                     // Specific message if Cognito complains about an attribute
+                     userMessage = `A required field might be missing or invalid. (${err.message})`;
+                }
+                 else if (err.name === "InvalidParameterException") userMessage = `Invalid input: ${err.message}.`;
+                else if (err.code === "NetworkError") userMessage = "Network error. Please check your connection.";
+                // Use the error message from the exception if available
+                else userMessage = err.message || userMessage;
+                showMessage(userMessage, "error"); // Display the error to the user
+            } finally {
+                // Always re-enable the submit button after the attempt
+                toggleButtonLoading(submitBtn, false);
+            }
+        });
+
+        /**
+         * Handles the submission of the verification code.
+         * Confirms the sign-up with Cognito and then creates the user profile via AppSync.
+         */
+        verifyBtn.addEventListener("click", async () => {
+            const code = $('verifyCode').value.trim();
+            // Basic validation for the code format
+            if (!code || !/^\d{6}$/.test(code)) {
+                showMessage("Please enter the 6-digit verification code.", "error");
+                return;
+            }
+
+            let emailToVerify;
+            let mutationInput;
+            try {
+                 // Retrieve the email and profile data saved earlier
+                 emailToVerify = localStorage.getItem(PENDING_VERIFICATION_EMAIL_KEY);
+                 const storedData = localStorage.getItem(PENDING_REGISTRATION_DATA_KEY);
+                 if (!emailToVerify || !storedData) {
+                     // If data is missing, something went wrong or user refreshed unexpectedly
+                     console.error("Missing email or profile data in localStorage during verification.");
+                     throw new Error("Essential registration data not found. Please restart registration.");
+                 }
+                 mutationInput = JSON.parse(storedData);
+
+                 // Final validation check on the retrieved data before sending to AppSync
+                 if (!mutationInput.name || !mutationInput.email || !mutationInput.role || !mutationInput.location) {
+                     console.error("Data retrieved from storage is missing required fields:", mutationInput);
+                     throw new Error("Incomplete registration data found. Please restart registration.");
+                 }
+
+                 console.log("Retrieved for verification - Email:", emailToVerify, "Mutation Input:", mutationInput);
+            } catch (storageError) {
+                 // Handle errors during retrieval or parsing
+                 console.error("Failed to retrieve/parse/validate pending data:", storageError);
+                 showMessage(`Error retrieving registration data: ${storageError.message}. Please restart.`, "error");
+                 // Consider clearing potentially corrupted storage items
+                 // localStorage.removeItem(PENDING_REGISTRATION_DATA_KEY);
+                 // localStorage.removeItem(PENDING_VERIFICATION_EMAIL_KEY);
+                 return; // Stop processing
+            }
+
+            toggleButtonLoading(verifyBtn, true); // Disable button, show loading
+            showMessage("Verifying code...");
+
+            try {
+                // Step 1: Confirm the user's email with Cognito
+                console.log(`Attempting Auth.confirmSignUp for ${emailToVerify} with code ${code}`);
+                await Auth.confirmSignUp(emailToVerify, code);
+                console.log(`Cognito sign up confirmed successfully for ${emailToVerify}`);
+
+                // Step 2: Create the user profile in DynamoDB via AppSync mutation
+                showMessage("Creating user profile...");
+                console.log("Attempting callGraphQL for CREATE_USER_MUTATION with input:", JSON.stringify({ input: mutationInput }, null, 2));
+                const creationResult = await callGraphQL(CREATE_USER_MUTATION, { input: mutationInput });
+
+                // Verify the mutation result
+                if (creationResult && creationResult.createUser && creationResult.createUser.id) {
+                    // Success! Profile created.
+                    console.log("User profile successfully created via AppSync:", creationResult.createUser);
+                    showMessage("Account verified and profile created! Redirecting to sign in...", "success");
+                    // Clean up temporary registration data from localStorage
+                    localStorage.removeItem(PENDING_REGISTRATION_DATA_KEY);
+                    localStorage.removeItem(PENDING_VERIFICATION_EMAIL_KEY);
+                    console.log("Cleared pending registration data after successful profile creation.");
+                    // Redirect to sign-in page after a short delay
+                    setTimeout(() => { window.location.href = "signin.html"; }, 2500);
+                } else {
+                    // Handle case where the mutation call seemed okay but didn't return expected data
+                    console.error("createUser mutation seemed successful but returned unexpected data:", creationResult);
+                    throw new Error("Profile creation step completed but failed to confirm success. Please try signing in or contact support if the issue persists.");
+                }
+
+            } catch (err) {
+                // Handle errors from either Auth.confirmSignUp or callGraphQL
+                console.error("Error during Verification/Profile Creation step:", err); // Log the full error
+                // Map common errors to user-friendly messages
+                let userMessage = "Verification or profile creation failed.";
+                if (err.name === "CodeMismatchException") userMessage = "Incorrect verification code.";
+                else if (err.name === "ExpiredCodeException") userMessage = "Verification code has expired. Please resend.";
+                else if (err.name === "NotAuthorizedException") userMessage = "Account may already be confirmed or issue with authorization.";
+                else if (err.name === "UserNotFoundException") userMessage = "User not found during confirmation step.";
+                // Use the specific message from the caught error if available
+                else userMessage = err.message || userMessage;
+                showMessage(userMessage, "error"); // Display error to user
+                // Do NOT clear localStorage here, as the user might just need to re-enter the code
+            } finally {
+                toggleButtonLoading(verifyBtn, false); // Always re-enable the button
+            }
+        });
+
+        /**
+         * Handles the click event for the "Resend code" link.
+         * Calls Cognito Auth.resendSignUp.
+         */
+        resendCodeLink.addEventListener("click", async (e) => {
+            e.preventDefault(); // Prevent link navigation
+            // Retrieve the email stored for verification
+            const emailToResend = localStorage.getItem(PENDING_VERIFICATION_EMAIL_KEY);
+            if (!emailToResend) {
+                 showMessage("Could not retrieve email to resend code. Please restart registration.", "error");
+                 return;
+            }
+            showMessage("Resending code..."); // Provide feedback
+            console.log(`Attempting Auth.resendSignUp for ${emailToResend}`);
+            try {
+                // Call Amplify function to resend the code
+                await Auth.resendSignUp(emailToResend);
+                console.log(`Resend code successful for ${emailToResend}`);
+                showMessage("Verification code resent to your email.", "info");
+            } catch (err) {
+                // Handle errors during resend attempt
+                console.error("Resend Code Error:", err);
+                 let userMessage = "Failed to resend code.";
+                 if (err.name === "LimitExceededException") userMessage = "Attempt limit exceeded. Please try again later.";
+                 else if (err.name === "UserNotFoundException") userMessage = "User associated with this email not found."; // Should ideally not happen if PENDING_VERIFICATION_EMAIL_KEY exists
+                 else userMessage = err.message || userMessage;
+                showMessage(userMessage, "error");
+            }
+        });
+
+        /**
+         * Checks on page load if there's pending verification data in localStorage
+         * (e.g., if the user refreshed the page during the verification step).
+         * If found, it shows the verification section directly.
+         */
+        window.addEventListener('load', () => {
+             const emailForVerification = localStorage.getItem(PENDING_VERIFICATION_EMAIL_KEY);
+             if (emailForVerification) {
+                console.log("Found pending verification email on load:", emailForVerification);
+                 // Ensure the corresponding profile data also exists, otherwise it's an inconsistent state
+                 if (!localStorage.getItem(PENDING_REGISTRATION_DATA_KEY)) {
+                     console.warn("Pending email found, but registration data missing. Clearing email.");
+                     localStorage.removeItem(PENDING_VERIFICATION_EMAIL_KEY); // Clear inconsistent state
+                     return; // Let user start over
+                 }
+                 // Restore the verification UI state
+                 verifyEmailEl.textContent = emailForVerification;
+                 hide(registrationForm);
+                 show(verifySection);
+                 showMessage("Enter the verification code sent to your email, or resend if needed.", "info");
+                 $('verifyCode').focus();
+             } else {
+                // Normal page load, no pending verification found
+                console.log("No pending verification email found on load.");
+             }
+        });
+
+    </script>
+</body>
+</html>

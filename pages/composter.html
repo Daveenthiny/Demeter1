@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Composter Dashboard | Demeter</title>
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<link rel="stylesheet" href="../styles/home_page.css">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.css" rel="stylesheet">
+
+<style>
+/* --- General Styles & Buttons --- */
+button, .cta-button-secondary {
+  background-color: #3182ce; /* Primary Blue */
+  color: #ffffff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  font-family: inherit;
+  transition: opacity 0.2s ease;
+  margin-right: 10px; /* Default spacing */
+}
+.cta-button-secondary { background-color: #6c757d; /* Grey */ }
+button:hover, .cta-button-secondary:hover { opacity: 0.9; }
+button:disabled { background-color: #a0aec0; cursor: not-allowed; opacity: 0.7; }
+#signOutButton { padding: 5px 10px; font-size: 0.9em; margin-right: 0; }
+
+/* --- Dashboard Specific --- */
+.dashboard-page h1 { color: #000408; margin-bottom: 10px; font-size: 1.8em; }
+.dashboard-page h1 strong { font-weight: 700; }
+.dashboard-page p { line-height: 1.6; color: #555; }
+.dashboard-section { margin-bottom: 30px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,.1); }
+.dashboard-section h2 { margin-top: 0; color: #00050e; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; font-size: 1.4em; }
+
+/* --- Map --- */
+#map-container { min-height: 400px; width: 100%; margin-bottom: 20px; position: relative; }
+#map { height: 400px; width: 100%; border-radius: 8px; }
+
+/* --- Search & Table --- */
+#search-container { margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+#search-container label { font-weight: 600; margin-bottom: 0; } /* Removed bottom margin */
+#search { padding: 8px 12px; flex-grow: 1; /* Allow input to grow */ min-width: 200px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 0; }
+#searchButton { margin-bottom: 0; }
+
+#table-container, #pickup-requests .table-wrapper { width: 100%; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { border: 1px solid #ddd; padding: 10px 12px; text-align: left; font-size: .9em; vertical-align: middle; white-space: nowrap; }
+th { background-color: #f2f2f2; cursor: pointer; font-weight: 600; }
+th.sortable::after { content: " \2195"; font-size: .8em; color: #aaa; display: inline-block; }
+th.sortable.asc::after { content: " \2191"; color: green; }
+th.sortable.desc::after { content: " \2193"; color: red; }
+tbody tr:nth-child(even) { background-color: #f9f9f9; }
+tbody tr:hover { background-color: #eef; }
+
+/* --- Pickup Form --- */
+#pickup-form label { display: block; margin-bottom: 15px; font-weight: 600; }
+#pickup-form input[type="text"],
+#pickup-form input[type="date"],
+#pickup-form textarea {
+    width: calc(100% - 22px); /* Account for padding and border */
+    padding: 8px 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.95em;
+    box-sizing: border-box; /* Include padding and border in width */
+}
+#pickup-form textarea { resize: vertical; min-height: 60px; }
+#pickup-form button[type="submit"] { margin-top: 10px; }
+#form-msg { font-weight: 600; margin-top: 10px; display: block; padding: 8px; border-radius: 4px; }
+
+/* --- Messages --- */
+.status-message { margin-top: 10px; font-weight: 700; font-size: .9em; padding: 10px; border-radius: 4px; }
+.success-message { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+.error-message { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+#error { padding: 20px; text-align: center; }
+#auth-error-message { margin-bottom: 20px; }
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  header, footer { flex-direction: column; text-align: center; }
+  header nav { margin-top: 10px; }
+  header nav ul { justify-content: center; }
+  header nav li { margin: 0 10px; }
+  footer nav { margin-top: 10px; width: 100%; }
+  footer nav ul { flex-wrap: wrap; justify-content: center; padding: 0; }
+  footer nav li { margin: 5px 10px; }
+  footer p { text-align: center; margin-top: 10px; margin-left: 0; width: 100%; }
+  #search-container { flex-direction: column; align-items: stretch; gap: 5px; }
+  #search { width: 100%; box-sizing: border-box; margin-right: 0; } /* Ensure full width */
+  #searchButton { width: 100%; margin-top: 10px; }
+  .dashboard-page h1 { font-size: 1.5em; }
+  .dashboard-section h2 { font-size: 1.2em; }
+}
+</style>
+</head>
+
+<body>
+  <header style="display:flex;align-items:center;justify-content:space-between;">
+    <a href="../index.html" class="logo" style="margin-right: auto;"> <img src="../assets/photos/demeter_logo_png.png" alt="Demeter Logo" class="logo-icon" />
+    </a>
+    <nav>
+       <ul style="display: flex; list-style: none; padding: 0; margin: 0; align-items: center;">
+         <li style="margin-right: 15px;"><a href="../index.html">Home</a></li>
+         <li style="margin-left: 10px;"><button id="signOutButton" class="cta-button-secondary">Sign Out</button></li>
+       </ul>
+    </nav>
+  </header>
+
+<main class="dashboard-page">
+<div class="container">
+
+  <div id="auth-error-message" class="error-message" style="display:none; text-align: center;"></div>
+
+  <div id="dashboard-content" style="display:none">
+    <h1>Composter Dashboard<br>
+      Welcome, <strong id="welcome-name">Composter</strong></h1>
+
+    <section class="dashboard-section">
+      <h2>Vendors Near You</h2>
+      <p>This map can show locations of vendors or available food items relevant to composters.</p>
+      <div id="map-container"><div id="map"></div></div>
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Available Food Items for Composters</h2>
+      <p>Review available food items below. Use the form to request pickup for composting.</p>
+      <div id="search-container">
+        <label for="search">Search by Category or Name:</label>
+        <input type="search" id="search" placeholder="e.g., Vegetable Scraps, Coffee Grounds">
+        <button id="searchButton" class="cta-button-secondary">Search</button>
+      </div>
+
+      <div id="table-container">
+        <table id="foodTable">
+          <thead>
+            <tr>
+              <th class="sortable" onclick="sortTable(0)">Name</th>
+              <th class="sortable" onclick="sortTable(1)">Category</th>
+              <th class="sortable" onclick="sortTable(2)">Expiry/Available Since</th>
+              <th class="sortable" onclick="sortTable(3)">Location</th>
+              <th class="sortable" onclick="sortTable(4)">Vendor</th>
+              <th class="sortable" onclick="sortTable(5)">Condition</th>
+              <th class="sortable" onclick="sortTable(6)">Quantity</th>
+              <th>Action</th> </tr>
+          </thead>
+          <tbody id="tableBody">
+             <tr><td colspan="8" style="text-align:center;">Loading food items...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Request Pickup</h2>
+      <form id="pickup-form">
+        <input type="hidden" id="pickupVendorId" name="vendorId" value="54c8a468-6001-702b-1914-886a469a37e8">
+        <input type="hidden" id="pickupItemId" name="itemId" value="item-1c7e53a0-12db-498c-9a6f-b92d5b3ab4e8">
+        <label>Item
+          <input type="text" id="description" name="description" required />
+        </label>
+        <label>Pickup Date
+          <input type="date" id="pickupDate" name="pickupDate" />
+        </label>
+        <label>Vendor Name
+          <input type="text" id="vendorName" name="vendorName" required />
+        </label>
+        <label>Pickup Location
+          <input type="text" id="location" name="location" required />
+        </label>
+        <button type="submit">Submit Pickup Request</button>
+        <p id="form-msg" class="status-message" style="display:none;"></p>
+      </form>
+    </section>    
+
+      <section class="dashboard-section">
+        <h2>My Pickup Requests</h2>
+        <div id="pickup-requests"><p style="text-align: center;">Loading your pickup requests…</p></div>
+      </section>
+
+  </div> </div> </main>
+
+<footer style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 15px 20px;">
+  <nav>
+    <ul style="display: flex; flex-wrap: wrap; list-style: none; padding: 0; margin: 0;">
+      <li style="margin-right: 15px;"><a href="about-us.html">About Us</a></li>
+      <li style="margin-right: 15px;"><a href="faq.html">FAQ</a></li>
+      <li style="margin-right: 15px;"><a href="contact.html">Contact</a></li>
+      <li style="margin-right: 15px;"><a href="privacy-policy.html">Privacy Policy</a></li>
+      <li style="margin-right: 15px;"><a href="terms-of-service.html">Terms of Service</a></li>
+      <li style="margin-right: 15px;"><a href="our-impact.html">Our Impact</a></li>
+      <li style="margin-right: 15px;"><a href="success-stories.html">Success Stories</a></li>
+      <li style="margin-right: 15px;"><a href="resources.html">Local Food Waste Resources</a></li>
+    </ul>
+  </nav>
+  <p style="margin-left:auto;font-size:0.9rem; text-align: right; margin-top: 10px; width: 100%; box-sizing: border-box;">&copy; <span id="year"></span>&nbsp;Demeter Marketplace. All rights reserved.</p>
+</footer>
+
+<script src="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.js"></script>
+
+<script>
+/* --------------------------------------------------
+   Configuration (API Keys should be secured)
+-------------------------------------------------- */
+// URLs and Keys for AppSync APIs
+const foodApiUrl   = 'https://423dqtssufh3zafje2juqy7d7i.appsync-api.us-east-1.amazonaws.com/graphql';
+const foodApiKey   = 'da2-hqc7j2vsmragnjlprebm4nyxiy'; // WARNING: Secure this key
+const pickupApiUrl = 'https://uyeagwbcw5f75bmcu2j3kmrwrq.appsync-api.us-east-1.amazonaws.com/graphql'; // Verified URL for pickups
+const pickupApiKey = 'da2-yagp42nwuzfbxbdrq2yw5jpkgy'; // Verified Key for pickups
+
+// Map Configuration using Amazon Location Service
+const mapApiKey = "v1.public.eyJqdGkiOiIyMzY2OWZjMC0zODRiLTRmYTItYWZiNi02MjRiYjliNjJlNjMifWtbEJVV0Of4i97XkzJwAOjZxnDZsG4l1RTaXNscBYVF-uoSfiZnUxLTZ6MVTXyrQpiCMNEbE4Mtrlz3xn-Y_hQgZYky7dUxMOcnTDnycdHu_9LRs0vXlbpPda6oG2KAV1w--5eQg2EE8iXvCt5AEgh5Kewf4lChuvcPyo8hrTVOCexgNom23tB09fzBqpI2WyrPqFwuo8viMlUiQGdAqNvfXY98y1VEwHNoyK5orJiXfAkrMLnn_k1uLcB-Kf9vxh0wZIhzUJq-TMoYX58gXlEZRkULjQzHfqTN90UYJMoKBUzIs9Zbji1_dVgxKqvka6KFgk5EDyYSWNmlXF1e-qk.ZWU0ZWIzMTktMWRhNi00Mzg0LTllMzYtNzlmMDU3MjRmYTkx"; // Your provided API Key
+const mapName   = "DemeterFoodMap";             // Your Map Name
+const region    = 'us-east-1';                  // AWS region for Location Service
+
+/* --------------------------------------------------
+   Helper Functions
+-------------------------------------------------- */
+/**
+ * Performs a GraphQL query using fetch.
+ * Includes basic validation and error handling.
+ * @param {string} url - The GraphQL endpoint URL.
+ * @param {string} key - The API key for authentication.
+ * @param {string} query - The GraphQL query string.
+ * @param {object} [variables={}] - Optional variables for the query.
+ * @returns {Promise<object>} - The data object from the GraphQL response.
+ */
+const gql = async (url, key, query, variables = {}) => {
+  // Basic validation for URL and Key
+  if (!url || !key) {
+      const errorMsg = "GraphQL API URL or Key is missing in configuration.";
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+  }
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key, // Using API Key authentication
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+
+    // Check for non-successful HTTP status codes
+    if (!response.ok) {
+        let errorBody = 'Could not read error response body.';
+        try { // Try to read the response body for more details
+            errorBody = await response.text();
+        } catch (readError) {
+            console.warn("Failed to read error response body:", readError);
+        }
+        console.error(`HTTP Error Response: ${response.status} ${response.statusText}`, errorBody);
+        // Provide a more generic HTTP error message to the user potentially
+        throw new Error(`Network request failed with status: ${response.status}`);
+    }
+
+    // Parse the JSON response
+    const jsonResponse = await response.json();
+
+    // Check for GraphQL errors specifically returned in the response body
+    if (jsonResponse.errors) {
+      console.error("GraphQL Errors:", JSON.stringify(jsonResponse.errors, null, 2));
+      // Combine multiple error messages if present
+      const errorMessage = jsonResponse.errors.map(e => e.message || 'Unknown GraphQL error').join('; ');
+      throw new Error(`GraphQL Error: ${errorMessage}`);
+    }
+
+    // Ensure the 'data' field exists in the response, even if it's null
+    if (!('data' in jsonResponse)) {
+        console.warn("No 'data' field in GraphQL response:", jsonResponse);
+        // Depending on the API, 'data' being absent might be an error itself
+        throw new Error("Invalid GraphQL response structure: 'data' field missing.");
+    }
+    return jsonResponse.data; // Return the data part of the response
+
+  } catch (error) {
+    // Log the detailed error caught during fetch or processing
+    console.error('Error executing GraphQL request:', { url, query: query.substring(0,100)+'...', variables, error }); // Log truncated query
+    // Re-throw the error so the calling function knows something went wrong
+    // If it's a custom error, it preserves the message; otherwise, wrap it.
+    throw new Error(error.message || 'An unexpected error occurred during the API request.');
+  }
+};
+
+// **** ADDED: localStorage Helper Functions ****
+/**
+ * Gets an item from localStorage.
+ * @param {string} key - The key of the item to retrieve.
+ * @returns {string|null} - The value from localStorage or null if not found.
+ */
+const StorageGet = key => localStorage.getItem(key);
+
+/**
+ * Clears all items from localStorage.
+ */
+const StorageClear = () => localStorage.clear();
+
+
+/* --------------------------------------------------
+   Food Items Logic (Similar to Customer/Vendor)
+-------------------------------------------------- */
+let foodData = []; // Holds the master list of food items
+let sortCol = null; // Tracks the current sort column index
+let sortDir = 'asc'; // Tracks the current sort direction
+
+/**
+ * Loads available food items relevant to composters.
+ * (Currently fetches all available food, might need refinement based on schema)
+ */
+async function loadFood() {
+  const tableBody = document.getElementById('tableBody');
+  if (!tableBody) { console.error("Food table body ('tableBody') not found!"); return; }
+  tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Loading available food...</td></tr>';
+
+  // Query to list food items (adjust filter if needed for composters)
+  const query = `query ListAvailableFood {
+      listDemeterFoodItems(filter: { quantity: { gt: 0 } }, limit: 1000) {
+          items { id name category expiryDate location vendorName condition quantity price lat lon }
+      }
+  }`;
+  try {
+    const data = await gql(foodApiUrl, foodApiKey, query);
+    foodData = data.listDemeterFoodItems?.items || []; // Store fetched data safely
+
+    if (foodData.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No food items currently available for composting requests.</td></tr>';
+      initMap([]); // Initialize map even if no items
+    } else {
+      renderTable(foodData); // Render the table
+      initMap(foodData); // Initialize map with items that have coordinates
+    }
+  } catch (error) {
+    console.error("Failed to load food items:", error);
+    // Display the error message from the gql helper
+    tableBody.innerHTML = `<tr><td colspan="8" class="error-message" style="text-align:center;">Error loading food items: ${error.message}</td></tr>`;
+    initMap([]); // Attempt to initialize the map in an empty state
+  }
+}
+
+/**
+ * Renders the provided array of food items into the table.
+ * @param {Array<object>} itemsArray - The array of food items to render.
+ */
+function renderTable(itemsArray) {
+  const tableBody = document.getElementById('tableBody');
+  if (!tableBody) return; // Safety check
+
+  if (!itemsArray || itemsArray.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No matching food items found.</td></tr>';
+    return;
+  }
+  // Generate table rows - Note the last column is empty for potential actions
+  tableBody.innerHTML = itemsArray.map(item => `
+    <tr>
+      <td>${item.name || 'N/A'}</td>
+      <td>${item.category || 'N/A'}</td>
+      <td>${item.expiryDate ? new Date(item.expiryDate).toLocaleDateString() : 'N/A'}</td>
+      <td>${item.location || 'N/A'}</td>
+      <td>${item.vendorName || 'N/A'}</td>
+      <td>${item.condition || 'N/A'}</td>
+      <td>${item.quantity ?? 'N/A'}</td>
+      <td></td> </tr>`).join('');
+  updateSortUI(); // Update visual indicators for sorting
+}
+
+/**
+ * Sorts the food data based on the selected column index and re-renders the table.
+ * @param {number} columnIndex - The index of the column to sort by (0-based).
+ */
+function sortTable(columnIndex) {
+    // Adjusted keys to match the 8 columns (last one is action, not sortable)
+  const keys = ['name', 'category', 'expiryDate', 'location', 'vendorName', 'condition', 'quantity', null];
+  const key = keys[columnIndex];
+  if (!key) return; // Do nothing if the action column header is clicked
+
+  // Determine sort direction
+  const isAscending = columnIndex === sortCol ? sortDir === 'desc' : true;
+  sortCol = columnIndex;
+  sortDir = isAscending ? 'asc' : 'desc';
+
+  // Sort a copy of the data
+  const sortedData = [...foodData].sort((a, b) => {
+    let valueA = a[key]; let valueB = b[key];
+    // Type-specific sorting logic
+    switch (key) {
+      case 'expiryDate':
+        valueA = valueA ? new Date(valueA).getTime() : 0;
+        valueB = valueB ? new Date(valueB).getTime() : 0;
+        break;
+      case 'quantity': case 'price': // Price might not be relevant here but keep logic
+        valueA = Number(valueA) || 0; valueB = Number(valueB) || 0;
+        break;
+      default: // Default to string comparison
+        valueA = String(valueA || '').toLowerCase(); valueB = String(valueB || '').toLowerCase();
+        return isAscending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA); // String sort handles return directly
+    }
+    // Numeric/Date sort return
+    return isAscending ? valueA - valueB : valueB - valueA;
+  });
+  renderTable(sortedData); // Re-render table
+}
+
+/**
+ * Updates the visual indicators (arrows) on table headers for sorting.
+ */
+function updateSortUI() {
+  document.querySelectorAll('#foodTable th.sortable').forEach((th, index) => {
+    th.classList.remove('asc', 'desc'); // Clear existing indicators
+    if (index === sortCol) {
+      th.classList.add(sortDir); // Add indicator to the sorted column
+    }
+  });
+}
+
+/**
+ * Filters the food items based on the search input and re-renders the table and map.
+ */
+function filterFoodItems() {
+    const searchTerm = document.getElementById('search').value.trim().toUpperCase();
+    let filteredItems;
+    // If search term is empty, show all data
+    if (!searchTerm) {
+        filteredItems = foodData;
+    } else {
+        // Filter data based on search term (category or name, case-insensitive)
+        filteredItems = foodData.filter(item =>
+            (item.category || '').toUpperCase().includes(searchTerm) ||
+            (item.name || '').toUpperCase().includes(searchTerm)
+        );
+    }
+    renderTable(filteredItems); // Render table with filtered (or all) items
+    addMarkersToMap(filteredItems); // Update map markers accordingly
+}
+
+// Add event listeners for search functionality
+const searchButton = document.getElementById('searchButton');
+const searchInput = document.getElementById('search');
+if (searchButton) {
+    searchButton.addEventListener('click', filterFoodItems);
+} else { console.warn("Search button not found"); }
+if (searchInput) {
+    searchInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') { filterFoodItems(); } // Trigger search on Enter key
+    });
+} else { console.warn("Search input not found"); }
+
+
+/* --------------------------------------------------
+   Map Logic (MapLibre GL JS) - Vendor Locations?
+-------------------------------------------------- */
+let map; // Holds the map instance globally
+let currentMarkers = []; // Keep track of markers
+
+/**
+ * Initializes the MapLibre map.
+ * @param {Array<object>} initialData - Data (e.g., food items or vendors) to display initially.
+ */
+function initMap(initialData) {
+    if (map) { // Prevent re-initialization
+        addMarkersToMap(initialData);
+        return;
+    }
+    try {
+        map = new maplibregl.Map({
+            container: "map", // Map container ID
+            style: `https://maps.geo.${region}.amazonaws.com/maps/v0/maps/${mapName}/style-descriptor?key=${mapApiKey}`,
+            center: [-76.7, 39.3], // Default center (e.g., Baltimore area)
+            zoom: 11, // Default zoom
+        });
+        map.addControl(new maplibregl.NavigationControl(), "top-left"); // Add zoom/pan controls
+        map.on('load', () => addMarkersToMap(initialData)); // Add markers after map loads
+    } catch (error) {
+        console.error("Map initialization failed:", error);
+        const mapContainer = document.getElementById('map-container');
+        if(mapContainer) mapContainer.innerHTML = `<p class="error-message">Could not load map: ${error.message}</p>`;
+    }
+}
+
+/**
+ * Clears existing markers and adds new markers to the map.
+ * Assumes data items have 'lat' and 'lon' properties.
+ * @param {Array<object>} dataItems - Array of items to add markers for.
+ */
+function addMarkersToMap(dataItems) {
+    if (!map) return; // Ensure map is initialized
+
+    // Remove previous markers
+    currentMarkers.forEach(marker => marker.remove());
+    currentMarkers = [];
+
+    const bounds = new maplibregl.LngLatBounds(); // For auto-fitting the map view
+
+    dataItems.forEach(item => {
+        const lat = parseFloat(item.lat);
+        const lon = parseFloat(item.lon);
+
+        if (!isNaN(lat) && !isNaN(lon)) {
+            // Create popup content (adjust based on what 'item' represents)
+            const popupContent = `
+                <strong>${item.name || item.vendorName || 'Location'}</strong><br>
+                ${item.location || 'Address not available'}<br>
+                ${item.category ? `Category: ${item.category}<br>` : ''}
+                ${item.quantity ? `Quantity: ${item.quantity}<br>` : ''}
+            `;
+            const popup = new maplibregl.Popup({ offset: 25 }).setHTML(popupContent);
+
+            // Create marker (use a different color for composters?)
+            const marker = new maplibregl.Marker({ color: '#28a745' }) // Green marker
+                .setLngLat([lon, lat])
+                .setPopup(popup)
+                .addTo(map);
+
+            currentMarkers.push(marker); // Track marker
+            bounds.extend([lon, lat]); // Extend bounds
+        } else {
+            // Log if item lacks valid coordinates
+           // console.warn("Item lacks valid coordinates:", item.name || item.id);
+        }
+    });
+
+    // Fit map to markers if any were added
+    if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, { padding: 50, maxZoom: 15 });
+    } else if (dataItems.length > 0) {
+        // console.log("No valid coordinates found for the current items.");
+        // Optionally reset to default view if no markers shown
+        // map.flyTo({ center: [-76.7, 39.3], zoom: 11 });
+    }
+}
+
+/* --------------------------------------------------
+   Pickup Requests Logic
+-------------------------------------------------- */
+const pickupForm = document.getElementById('pickup-form');
+pickupForm?.addEventListener('submit', async ev => {
+  ev.preventDefault();
+
+  const msg = document.getElementById('form-msg');
+  const btn = pickupForm.querySelector('button[type="submit"]');
+  msg.style.display = 'block'; btn.disabled = true; msg.textContent = 'Submitting…';
+
+  const composterId = StorageGet('currentUserId');
+  if (!composterId) {
+    msg.textContent = 'Error: Not signed in.'; msg.className = 'error-message'; btn.disabled = false;
+    return;
+  }
+
+  // Read hidden vendorId and itemId
+  const vendorId = document.getElementById('pickupVendorId').value;
+  const itemId   = document.getElementById('pickupItemId').value;
+
+  // Validate hidden IDs
+  if (!vendorId || !itemId) {
+    msg.textContent = 'Error: Invalid vendor or item selection.';
+    msg.className = 'error-message'; btn.disabled = false;
+    return;
+  }
+
+  const input = {
+    composterId,
+    vendorId,
+    itemId,
+    status:      'Requested',
+    requestDate: new Date().toISOString(),
+    pickupDate:  document.getElementById('pickupDate').value || null,
+    description: document.getElementById('description').value.trim(),
+    location:    document.getElementById('location').value.trim(),
+    vendorName:  document.getElementById('vendorName').value.trim()
+  };
+
+  if (!input.description || !input.location || !input.vendorName) {
+    msg.textContent = 'Error: All fields are required.'; msg.className = 'error-message'; btn.disabled = false;
+    return;
+  }
+
+  const mutation = `
+    mutation CreatePickupRequest($input: CreatePickupRequestInput!) {
+      createPickupRequest(input: $input) {
+        id
+        description
+        pickupDate
+        location
+        vendorName
+      }
+    }
+  `;
+
+  try {
+    const res = await gql(pickupApiUrl, pickupApiKey, mutation, { input });
+    msg.textContent = `Success! ID: ${res.createPickupRequest.id}`; msg.className = 'success-message';
+    pickupForm.reset();
+    loadRequests(composterId);
+  } catch (e) {
+    msg.textContent = `Error: ${e.message}`; msg.className = 'error-message';
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+async function loadRequests(composterId) {
+  const container = document.getElementById('pickup-requests');
+  container.innerHTML = '<p style="text-align:center">Loading your pickup requests…</p>';
+
+  const query = `
+    query RequestsByComposter($composterId: ID!, $limit: Int) {
+      requestsByComposter(composterId: $composterId, limit: $limit) {
+        id
+        status
+        description
+        location
+        pickupDate
+        requestDate
+        vendorName
+        createdAt
+      }
+    }
+  `;
+  const variables = { composterId, limit: 50 };
+
+  try {
+    const data = await gql(pickupApiUrl, pickupApiKey, query, variables);
+    const items = data.requestsByComposter || [];
+
+    if (!items.length) {
+      container.innerHTML = '<p style="text-align:center">You have not made any pickup requests yet.</p>';
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Vendor</th>
+              <th>Status</th>
+              <th>Item</th>
+              <th>Pickup Address</th>
+              <th>Pickup Date</th>
+              <th>Requested At</th>
+              <th>Request ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map(r => `
+              <tr>
+                <td>${r.vendorName}</td>
+                <td>${r.status}</td>
+                <td>${r.description}</td>
+                <td>${r.location}</td>
+                <td>${r.pickupDate ? new Date(r.pickupDate).toLocaleDateString() : '—'}</td>
+                <td>${r.requestDate ? new Date(r.requestDate).toLocaleString() : '—'}</td>
+                <td>${r.id}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (e) {
+    container.innerHTML = `<p class="error-message" style="text-align:center">${e.message}</p>`;
+  }
+}
+
+/* --------------------------------------------------
+   Authentication & Page Initialization
+-------------------------------------------------- */
+/**
+ * Initializes the page on DOMContentLoaded event.
+ * Checks authentication status using localStorage and loads relevant data for Composters.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+  // Set the current year in the footer
+  const yearSpan = document.getElementById('year');
+  if (yearSpan) {
+     yearSpan.textContent = new Date().getFullYear();
+  } else {
+     console.warn("Element with ID 'year' not found in footer.");
+  }
+
+  // **** MODIFIED: Use localStorage consistently ****
+  const currentUserId = StorageGet('currentUserId');
+  const currentUserName = StorageGet('currentUserName');
+  const currentUserRole = StorageGet('currentUserRole');
+
+  // Get references to essential page elements
+  const dashboardContent = document.getElementById('dashboard-content');
+  const authErrorMessage = document.getElementById('auth-error-message');
+  const welcomeName = document.getElementById('welcome-name');
+
+  // Check if essential elements exist before proceeding
+  if (!dashboardContent || !authErrorMessage || !welcomeName) {
+      console.error("Essential dashboard elements (dashboard-content, auth-error-message, or welcome-name) are missing from the HTML.");
+      // Display a generic error or prevent further execution
+      if(authErrorMessage) {
+          authErrorMessage.textContent = "Page structure error. Please contact support.";
+          authErrorMessage.style.display = 'block';
+      }
+      return; // Stop initialization
+  }
+
+  // Check if user is logged in and has the 'Composter' role
+  if (currentUserId && currentUserRole === 'Composter') {
+    // User is authenticated and authorized
+    dashboardContent.style.display = 'block'; // Show the main content
+    authErrorMessage.style.display = 'none'; // Hide any auth errors
+    welcomeName.textContent = currentUserName || 'Composter'; // Display user's name or default
+
+    // Load initial data specific to the composter dashboard
+    loadFood(); // Loads food items table and initializes map (adjust if needed)
+    loadRequests(currentUserId); // Loads this composter's pickup requests
+
+  } else {
+    // User is not logged in or does not have the correct role
+    dashboardContent.style.display = 'none'; // Hide the main content
+    // Provide a specific error message based on the situation
+    if (currentUserId) { // User is logged in, but wrong role
+        authErrorMessage.textContent = `Access Denied. Your role ("${currentUserRole || 'Unknown'}") is not authorized to view this page. Please sign in as a Composter.`;
+    } else { // User is not logged in at all
+        authErrorMessage.textContent = 'Access Denied. Please sign in as a Composter to view this page.';
+    }
+    authErrorMessage.style.display = 'block'; // Show the error message
+    console.warn(`Access denied for Composter page: User ID: ${currentUserId}, Role: ${currentUserRole}`);
+    // Consider adding a link or button to redirect to sign-in
+    // authErrorMessage.innerHTML += ' <a href="signin.html">Sign In</a>';
+  }
+
+  // Setup Sign Out button functionality
+  const signOutButton = document.getElementById('signOutButton');
+  if (signOutButton) {
+      signOutButton.addEventListener('click', () => {
+          // **** MODIFIED: Clear localStorage consistently ****
+          StorageClear(); // Clear localStorage on sign out
+          window.location.href = 'signin.html'; // Redirect to sign-in page
+      });
+  } else {
+      // Log an error if the sign out button isn't found
+      console.error("Sign out button ('signOutButton') not found in the HTML.");
+  }
+});
+
+</script>
+</body>
+</html>
