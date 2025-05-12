@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demeter | Reduce Food Waste</title>
+  <link rel="stylesheet" href="styles/home_page1.css" />
+  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+  <style>
+    body {
+      overflow-x: hidden;
+    }
+    .corner-deco {
+      position: absolute;
+      width: 280px;
+      height: auto;
+      z-index: 1;
+      pointer-events: none;
+    }
+    header {
+      position: relative;
+      z-index: 2;
+    }
+    .hero-content {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      padding: 4rem 2rem;
+      position: relative;
+      z-index: 2;
+    }
+    .hero-text {
+      flex: 1 1 50%;
+      max-width: 600px;
+    }
+    .hero-text h1 {
+      font-size: 3.25rem;
+      line-height: 1.2;
+      max-width: 100%;
+      white-space: normal;
+    }
+    .hero-text .intro {
+      font-size: 1.25rem;
+      line-height: 1.6;
+      max-width: 100%;
+    }
+    .hero-image-block {
+      flex: 1 1 50%;
+      max-width: 600px;
+      position: relative;
+    }
+    .mascot.large {
+      width: 100%;
+      height: auto;
+    }
+    .cta {
+      display: inline-block;
+      margin-top: 1rem;
+      background-color: #002b1f;
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      text-align: center;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+    df-messenger {
+    z-index: 999;
+    position: fixed;
+    --df-messenger-font-color: #000;
+    --df-messenger-font-family: Arial;
+    --df-messenger-chat-background: #EEF7EE;
+    --df-messenger-message-user-background: #C8E6C9;
+    --df-messenger-message-bot-background: #FEF8E6;
+    bottom: 16px;
+    right: 16px;
+   }
+  </style>
+</head>
+
+<body class="hero-layout">
+
+  <div class="floral-divider-top">
+    <img src="assets/photos/overhangleftdet.png" alt="Floral Corner" class="corner-deco top-left" />
+    <img src="assets/photos/overhangrightdet.png" alt="Floral Corner" class="corner-deco top-right" />
+  </div>
+
+  <div class="floral-divider-bottom">
+    <img src="assets/photos/overhangleftdet.png" alt="Floral Corner" class="corner-deco bottom-left" />
+    <img src="assets/photos/overhangrightdet.png" alt="Floral Corner" class="corner-deco bottom-right" />
+  </div>
+
+  <header style="display: flex; align-items: center; justify-content: space-between;">
+      <a href="index.html" class="logo-text">Demeter</a>
+
+    <nav style="display: flex; list-style: none; padding: 0; margin: 0;">
+      <li style="margin-right: 15px;"><a href="#">Home</a></li>
+      <li style="margin-right: 15px;"><a href="pages/register.html">Register</a></li>
+      <li style="margin-right: 15px;"><a href="pages/signin.html">Sign In</a></li>
+    </nav>
+  </header>
+
+  <main class="hero-content">
+    <section class="hero-text">
+
+      <h1>Reshape Food Waste Into Purpose</h1>
+      <p class="intro">At Demeter, we transform surplus into service—empowering communities to reclaim food, restore balance, and reduce waste.</p>
+
+      <div class="info-block">
+        <h2>Rooted in Community</h2>
+        <p>Demeter connects local vendors, composting partners, and conscious consumers to build a sustainable food network. We believe nourishment should reach people—not landfills.</p>
+      </div>
+
+      <a href="pages/signin.html" class="cta">Sign-in to Explore the Marketplace</a>
+    </section>
+
+    <section class="hero-image-block">
+      <img src="assets/photos/demeter_nogpng.png" alt="Demeter mascot" class="mascot large" />
+
+    </section>
+  </main>
+
+  <div class="info-block quote-block">
+    <p>
+        “Every loaf unclaimed, every fruit unsold, carries the potential to feed, to heal, to connect.
+        Demeter is here to catch what would fall through the cracks—and place it back into human hands.”
+    </p>
+  </div>
+
+  <section class="section-belief">
+    <div class="content-box with-bar">
+      <p><strong>At Demeter,</strong> we believe food should nourish people—not landfills. Our platform makes it easy to turn surplus into service, and waste into opportunity.</p>
+    </div>
+  </section>
+
+  <div class="section-bridge"></div>
+
+  <section class="section-tools">
+    <div class="content-box with-bar">
+      <p><strong>Built on Modern Tools,</strong> Powered by secure, scalable infrastructure, our platform simplifies food recovery and redistribution. 
+        From imperfect produce to expiring goods, every item claimed through Demeter helps close the loop.</p>
+    </div>
+  </section>
+
+  <div class="section-bridge"></div>
+
+  <section class="section-community">
+    <div class="content-box with-bar">
+      <p>
+        <strong>Whether you’re a local vendor,</strong> a conscious consumer, or a composting partner,
+        Demeter gives you the tools to make a difference—one decision at a time.
+      </p>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <div class="how-it-works-box">
+      <div class="how-it-works-header">
+        <h2>The journey from surplus to sustainability is simple</h2>
+      </div>
+      <div class="steps">
+        <div class="step fade-in-up" style="animation-delay: 0.2s;">
+          <img src="assets/icons/basket3-fill.svg.svg" alt="Browse" />
+          <h3>Browse Surplus</h3>
+          <p>Explore discounted, imperfect, or surplus food items from local vendors.</p>
+        </div>
+        <div class="step fade-in-up" style="animation-delay: 0.4s;">
+          <img src="assets/icons/globe2.svg" alt="Choose" />
+          <h3>Choose Pickup or Compost</h3>
+          <p>Claim food, donate to others, or direct it to composting partners.</p>
+        </div>
+        <div class="step center-step" style="animation-delay: 0.6s;">
+          <img src="assets/icons/feather.svg" alt="Loop" />
+          <h3>End the Cycle</h3>
+          <p>Help reduce waste, save money, and create a sustainable food cycle.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="vendor-spotlight">
+    <h2>Vendor Spotlight</h2>
+    <div class="testimonial-carousel">
+      <div class="testimonial active">
+        <p>“Before Demeter, I threw away 40% of my weekly produce. Now, I earn from surplus—and I’m helping my community get access to affordable, fresh food. It’s empowering to be part of a system that values sustainability.”</p>
+        <div class="vendor-info">
+          <div><strong>Rhea</strong><br />Local Farmer – Willow Grove</div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <p>“Demeter helped me turn near-expired bakery goods into weekly donations for shelters. I used to dread waste at the end of the day—now I know it’s going to people who need it. It’s changed the way I think about business.”</p>
+        <div class="vendor-info">
+          <div><strong>Mateo</strong><br />Baker – Silverbay</div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <p>“We used to compost everything that didn’t sell. Now, people pick up our extras for their homes or compost hubs. It’s gone from waste to impact—and I’ve met some amazing people along the way.”</p>
+        <div class="vendor-info">
+          <div><strong>Priya</strong><br />Produce Vendor – Eastpine</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script>
+    const testimonials = document.querySelectorAll('.testimonial');
+    let current = 0;
+
+    function showNextTestimonial() {
+      testimonials[current].classList.remove('active');
+      current = (current + 1) % testimonials.length;
+      testimonials[current].classList.add('active');
+    }
+
+    setInterval(showNextTestimonial, 6000);
+    // Fade in wheat divider on scroll
+    const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        }
+    });
+    }, {
+    threshold: 0.2
+    });
+
+    document.querySelectorAll('.section-divider').forEach(el => {
+    observer.observe(el);
+    });
+  </script>
+<df-messenger
+project-id="strange-bird-458106-e1"
+agent-id="155d2da1-e8ab-4ad4-9930-72bc9ef71661"
+language-code="en"
+chat-icon="https://demeter.example.com/assets/demeter_chat_icon.svg"
+welcome-intent="WELCOME">
+<df-messenger-chat-bubble chat-title="Demeter Agent"></df-messenger-chat-bubble>
+</df-messenger>
+
+<footer style="display: flex; align-items: center; justify-content: space-between;">
+  <nav style="display: flex; list-style: none; padding: 0; margin: 0;">
+      <li style="margin-right: 15px;"><a href="pages/about-us.html">About Us</a></li>
+      <li style="margin-right: 15px;"><a href="pages/faq.html">FAQ</a></li>
+      <li style="margin-right: 15px;"><a href="pages/contact.html">Contact</a></li>
+      <li style="margin-right: 15px;"><a href="pages/privacy-policy.html">Privacy Policy</a></li>
+      <li style="margin-right: 15px;"><a href="pages/terms-of-service.html">Terms of Service</a></li>
+      <li style="margin-right: 15px;"><a href="pages/our-impact.html">Our Impact</a></li>
+      <li style="margin-right: 15px;"><a href="pages/success-stories.html">Success Stories</a></li>
+      <li style="margin-right: 15px;"><a href="pages/resources.html">Local Food Waste Resources</a></li>
+  </nav>
+  <p style="margin-left:auto;font-size:0.9rem;">&copy; <span id="year"></span>&nbsp;Demeter Marketplace. All rights reserved.</p>
+</footer>
+
+<script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
